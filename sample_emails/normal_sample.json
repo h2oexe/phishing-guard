@@ -1,0 +1,11 @@
+{
+  "subject": "Team meeting notes for this week",
+  "sender_name": "Ayse Demir",
+  "sender_email": "ayse.demir@company.com",
+  "sender_domain": "company.com",
+  "body_text": "Hello team, you can review the meeting notes here: https://sharepoint.com/sites/team-notes. Please let me know if anything is missing.",
+  "body_html": "<html><body><p>Hello team,</p><p>You can review the meeting notes here:</p><a href=\"https://sharepoint.com/sites/team-notes\">https://sharepoint.com/sites/team-notes</a></body></html>",
+  "attachments": [
+    "meeting_notes.pdf"
+  ]
+}

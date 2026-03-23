@@ -1,0 +1,65 @@
+{
+  "score": 84,
+  "level": "High Risk",
+  "summary": "Bu e-posta phishing olabilir",
+  "matched_rules": [
+    "DOMAIN_LINK_MISMATCH",
+    "DISPLAY_TARGET_MISMATCH",
+    "PHISHING_KEYWORDS",
+    "URGENCY_LANGUAGE",
+    "INVOICE_PRESSURE_LANGUAGE"
+  ],
+  "reasons": [
+    "Gonderen domaini ile link domaini uyusmuyor",
+    "Gorunen link ile gercek hedef farkli",
+    "Supheli ifadeler tespit edildi",
+    "Baski ve zaman baskisi olusturan ifadeler tespit edildi"
+  ],
+  "details": {
+    "sender_domain": "gmail.com",
+    "link_domains": [
+      "sasa-com-tr.fortimailcloud.com"
+    ],
+    "confidence_counts": {
+      "low": 2,
+      "medium": 2,
+      "high": 1
+    },
+    "rule_details": {
+      "DOMAIN_LINK_MISMATCH": {
+        "domains": [
+          "sasa-com-tr.fortimailcloud.com"
+        ]
+      },
+      "DISPLAY_TARGET_MISMATCH": {
+        "mismatches": [
+          "info@seninevin.com.tr -> ",
+          "www.seninevin.com.tr -> sasa-com-tr.fortimailcloud.com"
+        ]
+      },
+      "PHISHING_KEYWORDS": {
+        "keywords": [
+          "acil",
+          "askıya",
+          "doğrula",
+          "giriş",
+          "guvenlik",
+          "güvenlik",
+          "hemen"
+        ]
+      },
+      "URGENCY_LANGUAGE": {
+        "phrases": [
+          "24 saat içinde",
+          "acil",
+          "hemen"
+        ]
+      },
+      "INVOICE_PRESSURE_LANGUAGE": {
+        "phrases": [
+          "24 saat içinde"
+        ]
+      }
+    }
+  }
+}

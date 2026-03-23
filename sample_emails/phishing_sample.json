@@ -1,0 +1,12 @@
+{
+  "subject": "Urgent account verification required",
+  "sender_name": "Security Team",
+  "sender_email": "security@company.com",
+  "sender_domain": "company.com",
+  "body_text": "Please verify your password immediately by visiting https://bit.ly/secure-review. Failure to act may suspend your account.",
+  "body_html": "<html><body><p>Please verify your account.</p><a href=\"https://198.51.100.22/login\">https://company.com/login</a></body></html>",
+  "attachments": [
+    "invoice.pdf.exe",
+    "notes.txt"
+  ]
+}
