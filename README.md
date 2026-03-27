@@ -1,52 +1,114 @@
-# PhishGuard MVP
+# PhishGuard
 
-This repository contains the first local analyzer prototype for PhishGuard.
+PhishGuard, Outlook içindeki e-postaları yerel olarak analiz eden, phishing ve dolandırıcılık riskini kullanıcıya sade bir şekilde gösteren kural tabanlı bir masaüstü güvenlik yardımcısıdır.
 
-## Run
+## Bileşenler
 
-```bash
-python -m phishguard.main sample_emails/phishing_sample.json
-python -m phishguard.main sample_emails/normal_sample.json
+- `phishguard/`
+  Analiz motoru, kural sistemi, extractor ve skorlayıcı
+- `outlook/vba_integration/`
+  Outlook VBA köprüsü ve otomatik kategori uygulama akışı
+- `addin/`
+  Outlook sağ panel eklentisi ve admin panel arayüzü
+- `local_service/`
+  Add-in ve admin panelin konuştuğu yerel HTTPS servis
+- `data/runtime_config.json`
+  Çalışan konfigürasyon, admin ayarları ve değişiklik geçmişi
+
+## Temel Özellikler
+
+- Yerel analiz, dış servise veri çıkışı yok
+- Normalize edilmiş `0-100` risk skoru
+- `Düşük / Orta / Yüksek Risk` sınıflandırması
+- Outlook içinde otomatik kategori çubuğu
+- Sağ panelde ayrıntılı açıklama
+- Admin panelden:
+  - kural ağırlığı değiştirme
+  - etiket yönetimi
+  - alan adı / keyword / phrase yönetimi
+  - özel kural ekleme
+  - parola koruması
+  - değişiklik geçmişi
+  - fabrika ayarlarına dönüş
+
+## Çalışma Akışı
+
+### 1. Outlook otomatik analiz
+
+- Mail seçildiğinde veya ayrı pencerede açıldığında VBA köprüsü devreye girer.
+- Mail verisi JSON olarak dışa aktarılır.
+- Python analiz motoru çalışır.
+- Sonuca göre Outlook kategorisi uygulanır:
+  - `PhishGuard - Güvendesiniz`
+  - `PhishGuard - Orta Risk`
+  - `PhishGuard - Yüksek Risk`
+
+### 2. Outlook sağ panel
+
+- Kullanıcı `Risk Analizi` butonuna basınca task pane açılır.
+- Panel, yerel servise mevcut maili gönderir.
+- Risk skoru, özet açıklama ve kullanıcı dostu işaretler gösterilir.
+
+### 3. Admin panel
+
+- Admin panel yerel servis üzerinden açılır.
+- Ayarlar `runtime_config.json` içine kaydedilir.
+- Yeni eklenen özel etiketler artık sadece etiket listesinde değil:
+  - `Kural Motoru` bölümünde ağırlık kartı olarak
+  - `Kayıtlar` bölümünde özel ifade listesi olarak
+  görünür.
+
+## Hızlı Başlatma
+
+### Analyzer örnekleri
+
+```powershell
+python -m phishguard.main sample_emails\phishing_sample.json
+python -m phishguard.main sample_emails\normal_sample.json
 python run_samples.py
+```
+
+### Outlook export analizi
+
+```powershell
 python analyze_outlook_export.py
 ```
 
-## Current Scope
+### Yerel servis
 
-- Parse links from text and HTML
-- Extract basic phishing-related features
-- Evaluate a small rule set
-- Produce a 0-100 risk score with explanations
+```powershell
+python "C:\Users\stajyer_it1\Desktop\phish\local_service\server.py" --host localhost --port 3000 --cert-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-cert.pem" --key-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-key.pem"
+```
 
-## Sample Inputs
+### Admin panel
 
-- `sample_emails/phishing_sample.json`
-- `sample_emails/normal_sample.json`
+- `https://localhost:3000/admin/`
 
-## Outlook Bridge
+### Outlook add-in yükleme
 
-- Outlook export input: `outlook/last_selected_mail.json`
-- Analyzer output: `outlook/last_analysis_result.json`
+- `https://aka.ms/olksideload`
 
-## Windows Setup Standard
+## Ortam Değişkenleri
 
-For multi-user Windows setups, PhishGuard now checks these user environment variables first:
+Çok kullanıcılı kurulum için önce şu kullanıcı ortam değişkenleri kontrol edilir:
 
 - `PHISHGUARD_ROOT`
 - `PHISHGUARD_PYTHON`
 
-Recommended setup:
+Kolay kurulum:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1
 ```
 
-If Python is not available through `py -3`, set it explicitly:
+## Aktif Konfigürasyon
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1 -PythonExe "C:\Path\To\python.exe"
-```
+Kod içindeki başlangıç ayarları:
 
-## Note
+- `phishguard/config.py`
 
-The visible app name is `PhishGuard`. The internal Python package name remains `phishguard`.
+Çalışan gerçek ayarlar:
+
+- `data/runtime_config.json`
+
+Yani admin panelden yapılan değişiklikler doğrudan `config.py` dosyasına değil, `runtime_config.json` içine yazılır.

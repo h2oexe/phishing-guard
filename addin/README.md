@@ -1,38 +1,48 @@
 # PhishGuard Outlook Add-in
 
-This folder contains a minimal Outlook task pane add-in scaffold for PhishGuard.
+Bu klasör, Outlook içindeki sağ panel deneyimini sağlayan add-in dosyalarını içerir.
 
-## Architecture
+## Önemli Dosyalar
 
-- `manifest.xml`: Outlook add-in manifest
-- `web/taskpane.html`: task pane UI
-- `web/taskpane.js`: Outlook item read + localhost API call
-- `web/taskpane.css`: panel styling
+- `manifest.xml`
+  Outlook eklenti tanımı
+- `web/taskpane.html`
+  sağ panel HTML yapısı
+- `web/taskpane.css`
+  panel görünümü
+- `web/taskpane.js`
+  Outlook mail verisini okuyup yerel servise gönderen kod
+- `web/admin/`
+  yönetim paneli arayüzü
 
-## Current Direction
+## Görevleri
 
-The add-in reads the current email in Outlook using Office.js and posts it to a local analysis endpoint:
+### Kullanıcı paneli
 
-```text
-POST https://localhost:3000/api/analyze
+- mevcut maili Office.js ile okur
+- `https://localhost:3000/api/analyze` endpoint'ine gönderir
+- normalize skor ve kullanıcı dostu işaretleri gösterir
+
+### Admin panel
+
+- `https://localhost:3000/admin/` üzerinden açılır
+- runtime config'i düzenler
+- sürüm, kural, liste, etiket ve güvenlik ayarlarını yönetir
+
+## Gereken Servis
+
+Add-in'in çalışması için yerel HTTPS servis açık olmalıdır:
+
+```powershell
+python "C:\Users\stajyer_it1\Desktop\phish\local_service\server.py" --host localhost --port 3000 --cert-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-cert.pem" --key-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-key.pem"
 ```
 
-## Important
+## Yükleme
 
-This scaffold is prepared for the side-pane direction, but Outlook desktop sideloading typically requires a local HTTPS endpoint and trusted certificate.
+Outlook add-in sideload linki:
 
-The current repo does not yet include the HTTPS cert setup. That is the next setup step.
+- `https://aka.ms/olksideload`
 
-## Local Service
+Manifest dosyası:
 
-Run the local service from the repo root:
-
-```bash
-python local_service/server.py --host localhost --port 3000
-```
-
-For Outlook desktop sideloading, the next step is serving the same endpoint over HTTPS with a trusted localhost certificate.
-
-See:
-
-- `local_service/README.md`
+- `addin/manifest.xml`

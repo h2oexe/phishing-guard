@@ -1,61 +1,46 @@
-# PhishGuard Local HTTPS Setup
+# PhishGuard Local Service
 
-This folder contains the local HTTPS service for the Outlook add-in.
+Bu klasör, Outlook add-in ve admin panelin kullandığı yerel HTTPS servisi içerir.
 
-## Recommended First Step
+## Ana Dosya
 
-From the repo root, set the standard user environment variables:
+- `server.py`
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1
-```
+## Endpointler
 
-If Python is not available through `py -3`, set it explicitly:
+- `POST /api/analyze`
+  mail analiz sonucu üretir
+- `GET /api/meta`
+  add-in için sürüm ve etiket meta bilgisi verir
+- `GET /api/admin/access`
+  admin erişim durumunu verir
+- `POST /api/admin/login`
+  admin giriş doğrulaması
+- `GET /api/admin/config`
+  yönetim paneli ayarlarını okur
+- `PUT /api/admin/config`
+  yönetim paneli ayarlarını kaydeder
+- `POST /api/admin/verify-password`
+  kritik işlem öncesi parola doğrular
+- `POST /api/admin/reset`
+  fabrika ayarına dönüş yapar
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1 -PythonExe "C:\Path\To\python.exe"
-```
-
-## 1. Generate localhost certificate
-
-```bash
-python local_service/generate_dev_cert.py
-```
-
-Generated files:
-
-- `local_service/certs/localhost-cert.pem`
-- `local_service/certs/localhost-cert.cer`
-- `local_service/certs/localhost-key.pem`
-
-## 2. Trust the certificate in Windows
-
-Run in PowerShell:
+## Servisi Başlatma
 
 ```powershell
-Import-Certificate -FilePath "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-cert.cer" -CertStoreLocation Cert:\CurrentUser\Root
+python "C:\Users\stajyer_it1\Desktop\phish\local_service\server.py" --host localhost --port 3000 --cert-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-cert.pem" --key-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-key.pem"
 ```
 
-## 3. Start the HTTPS service
+## Kullanıldığı Yerler
 
-```bash
-python local_service/server.py --host localhost --port 3000 --cert-file local_service/certs/localhost-cert.pem --key-file local_service/certs/localhost-key.pem
-```
+- Outlook sağ panel
+- admin panel
 
-Or use:
+## Not
 
-```powershell
-.\local_service\start_https_service.ps1
-```
+Servis kapalıysa:
 
-## 4. Sideload the add-in
+- admin panel açılmaz
+- Outlook add-in paneli analiz yapamaz
 
-Use:
-
-- `addin/manifest.xml`
-
-The manifest expects:
-
-- `https://localhost:3000/taskpane.html`
-- `https://localhost:3000/commands.html`
-- `https://localhost:3000/assets/...`
+Bu yüzden hem geliştirme hem demo sırasında servis penceresi açık kalmalıdır.
