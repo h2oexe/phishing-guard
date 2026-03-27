@@ -69,19 +69,55 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "custom_rule_phrases": {},
     },
     "rule_chip_labels": {
-        "DOMAIN_LINK_MISMATCH": "Bağlantı Uyuşmazlığı",
+        "DOMAIN_LINK_MISMATCH": "Ba\u011flant\u0131 Uyu\u015fmazl\u0131\u011f\u0131",
         "DISPLAY_TARGET_MISMATCH": "Sahte Hedef",
-        "SHORTENER_LINK": "Kısa Bağlantı",
-        "SUSPICIOUS_ATTACHMENT": "Şüpheli Ek",
-        "DOUBLE_EXTENSION": "Çift Uzantı",
-        "IP_LINK": "IP Bağlantısı",
-        "URGENCY_LANGUAGE": "Zaman Baskısı",
+        "SUSPICIOUS_TLD": "\u015e\u00fcpheli Uzant\u0131",
+        "SHORTENER_LINK": "K\u0131sa Ba\u011flant\u0131",
+        "SUSPICIOUS_ATTACHMENT": "\u015e\u00fcpheli Ek",
+        "DOUBLE_EXTENSION": "\u00c7ift Uzant\u0131",
+        "PHISHING_KEYWORDS": "\u015e\u00fcpheli \u0130fadeler",
+        "IP_LINK": "IP Ba\u011flant\u0131s\u0131",
+        "URGENCY_LANGUAGE": "Zaman Bask\u0131s\u0131",
         "ACCOUNT_THREAT_LANGUAGE": "Hesap Tehdidi",
-        "EXTORTION_LANGUAGE": "Şantaj Dili",
-        "UNEXPECTED_ATTACHMENT_REQUEST": "Ek Açma Talebi",
-        "PAYMENT_REQUEST_LANGUAGE": "Ödeme Talebi",
-        "BANK_CHANGE_LANGUAGE": "IBAN Değişikliği",
-        "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı",
+        "EXTORTION_LANGUAGE": "\u015eantaj Dili",
+        "UNEXPECTED_ATTACHMENT_REQUEST": "Ek A\u00e7ma Talebi",
+        "PAYMENT_REQUEST_LANGUAGE": "\u00d6deme Talebi",
+        "BANK_CHANGE_LANGUAGE": "IBAN De\u011fi\u015fikli\u011fi",
+        "INVOICE_PRESSURE_LANGUAGE": "Fatura Bask\u0131s\u0131"
+    },
+    "rule_display_meta": {
+        "PHISHING_KEYWORDS": {
+            "title": "Phishing Anahtar Kelimeleri",
+            "description": "Metin tabanl\u0131 sinyalleri etkiler."
+        },
+        "URGENCY_LANGUAGE": {
+            "title": "Aciliyet \u0130fadeleri",
+            "description": "Zaman bask\u0131s\u0131 olu\u015fturan metinleri y\u00f6netir."
+        },
+        "ACCOUNT_THREAT_LANGUAGE": {
+            "title": "Hesap Tehdidi \u0130fadeleri",
+            "description": "Hesap kapanmas\u0131 veya ask\u0131ya alma s\u00f6ylemlerini y\u00f6netir."
+        },
+        "EXTORTION_LANGUAGE": {
+            "title": "\u015eantaj ve \u015eifreleme \u0130fadeleri",
+            "description": "Dosya \u015fifreleme, veri s\u0131zd\u0131rma veya eri\u015fim kayb\u0131 tehdidi i\u00e7eren metinleri y\u00f6netir."
+        },
+        "UNEXPECTED_ATTACHMENT_REQUEST": {
+            "title": "Ek A\u00e7ma \u0130fadeleri",
+            "description": "Ek dosya a\u00e7maya y\u00f6nlendiren c\u00fcmleleri tutar."
+        },
+        "PAYMENT_REQUEST_LANGUAGE": {
+            "title": "\u00d6deme Talebi \u0130fadeleri",
+            "description": "\u00d6deme ve dekont \u00e7a\u011fr\u0131lar\u0131n\u0131 y\u00f6netir."
+        },
+        "BANK_CHANGE_LANGUAGE": {
+            "title": "Banka De\u011fi\u015fikli\u011fi \u0130fadeleri",
+            "description": "IBAN veya banka hesab\u0131 de\u011fi\u015fikli\u011fi sinyallerini y\u00f6netir."
+        },
+        "INVOICE_PRESSURE_LANGUAGE": {
+            "title": "Fatura Bask\u0131s\u0131 \u0130fadeleri",
+            "description": "S\u00fcre bask\u0131s\u0131 ve fatura takibi s\u00f6ylemlerini y\u00f6netir."
+        }
     },
     "admin_access": {
         "password_enabled": False,
@@ -230,6 +266,7 @@ def _verify_password_against_access(password: str, access: dict[str, Any]) -> bo
 
 def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     rule_labels = config.setdefault("rule_chip_labels", {})
+    rule_display_meta = config.setdefault("rule_display_meta", {})
     rule_weights = config.setdefault("rule_weights", {})
     disabled_rules = config.setdefault("disabled_rules", [])
     phrases = config.setdefault("phrases", {})
@@ -241,10 +278,21 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
         rule_weights.setdefault(rule_id, 0)
         value = custom_rule_phrases.get(rule_id, [])
         custom_rule_phrases[rule_id] = value if isinstance(value, list) else []
+        rule_display_meta.setdefault(
+            rule_id,
+            {
+                "title": str(rule_labels.get(rule_id, rule_id)),
+                "description": "",
+            },
+        )
 
     for rule_id in list(rule_weights):
         if rule_id not in BUILTIN_RULE_IDS and rule_id not in custom_rule_ids:
             rule_weights.pop(rule_id, None)
+
+    for rule_id in list(rule_display_meta):
+        if rule_id not in BUILTIN_RULE_IDS and rule_id not in custom_rule_ids:
+            rule_display_meta.pop(rule_id, None)
 
     for rule_id in list(custom_rule_phrases):
         if rule_id not in custom_rule_ids:
@@ -253,3 +301,5 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     config["disabled_rules"] = [
         rule_id for rule_id in disabled_rules if rule_id in BUILTIN_RULE_IDS or rule_id in custom_rule_ids
     ]
+
+

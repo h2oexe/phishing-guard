@@ -1,8 +1,17 @@
 {
   "app_version": "1.0.0",
   "version_note": "Ana Sürüm",
-  "updated_at": "2026-03-27T11:18:03.689886+00:00",
+  "updated_at": "2026-03-27T14:09:21.215394+00:00",
   "change_history": [
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "16 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-27T14:09:21.215394+00:00"
+    },
     {
       "actor": "Yönetici",
       "section": "Etiket adları",
@@ -73,7 +82,8 @@
     "UNEXPECTED_ATTACHMENT_REQUEST": 20,
     "PAYMENT_REQUEST_LANGUAGE": 18,
     "BANK_CHANGE_LANGUAGE": 22,
-    "INVOICE_PRESSURE_LANGUAGE": 16
+    "INVOICE_PRESSURE_LANGUAGE": 16,
+    "DENEME_ETIKET": 0
   },
   "thresholds": {
     "low_risk_max": 24,
@@ -299,14 +309,19 @@
       "today",
       "within 24 hours",
       "zorunludur"
-    ]
+    ],
+    "custom_rule_phrases": {
+      "DENEME_ETIKET": []
+    }
   },
   "rule_chip_labels": {
     "DOMAIN_LINK_MISMATCH": "Bağlantı Uyuşmazlığı",
     "DISPLAY_TARGET_MISMATCH": "Sahte Hedef",
+    "SUSPICIOUS_TLD": "Şüpheli Uzantı",
     "SHORTENER_LINK": "Kısa Bağlantı",
     "SUSPICIOUS_ATTACHMENT": "Şüpheli Ek",
     "DOUBLE_EXTENSION": "Çift Uzantı",
+    "PHISHING_KEYWORDS": "Şüpheli İfadeler",
     "IP_LINK": "IP Bağlantısı",
     "URGENCY_LANGUAGE": "Zaman Baskısı",
     "ACCOUNT_THREAT_LANGUAGE": "Hesap Tehdidi",
@@ -316,6 +331,72 @@
     "BANK_CHANGE_LANGUAGE": "IBAN Değişikliği",
     "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı",
     "DENEME_ETIKET": "Deneme Etiket"
+  },
+  "rule_display_meta": {
+    "PHISHING_KEYWORDS": {
+      "title": "Phishing Anahtar Kelimeleri",
+      "description": "Metin tabanlı sinyalleri etkiler."
+    },
+    "URGENCY_LANGUAGE": {
+      "title": "Aciliyet İfadeleri",
+      "description": "Zaman baskısı oluşturan metinleri yönetir."
+    },
+    "ACCOUNT_THREAT_LANGUAGE": {
+      "title": "Hesap Tehdidi İfadeleri",
+      "description": "Hesap kapanması veya askıya alma söylemlerini yönetir."
+    },
+    "EXTORTION_LANGUAGE": {
+      "title": "Şantaj ve Şifreleme İfadeleri",
+      "description": "Dosya şifreleme, veri sızdırma veya erişim kaybı tehdidi içeren metinleri yönetir."
+    },
+    "UNEXPECTED_ATTACHMENT_REQUEST": {
+      "title": "Ek Açma İfadeleri",
+      "description": "Ek dosya açmaya yönlendiren cümleleri tutar."
+    },
+    "PAYMENT_REQUEST_LANGUAGE": {
+      "title": "Ödeme Talebi İfadeleri",
+      "description": "Ödeme ve dekont çağrılarını yönetir."
+    },
+    "BANK_CHANGE_LANGUAGE": {
+      "title": "Banka Değişikliği İfadeleri",
+      "description": "IBAN veya banka hesabı değişikliği sinyallerini yönetir."
+    },
+    "INVOICE_PRESSURE_LANGUAGE": {
+      "title": "Fatura Baskısı İfadeleri",
+      "description": "Süre baskısı ve fatura takibi söylemlerini yönetir."
+    },
+    "DENEME_ETIKET": {
+      "title": "Deneme Etiket",
+      "description": "Açıklama"
+    },
+    "DISPLAY_TARGET_MISMATCH": {
+      "title": "",
+      "description": ""
+    },
+    "DOMAIN_LINK_MISMATCH": {
+      "title": "",
+      "description": ""
+    },
+    "DOUBLE_EXTENSION": {
+      "title": "",
+      "description": ""
+    },
+    "IP_LINK": {
+      "title": "",
+      "description": ""
+    },
+    "SHORTENER_LINK": {
+      "title": "",
+      "description": ""
+    },
+    "SUSPICIOUS_ATTACHMENT": {
+      "title": "",
+      "description": ""
+    },
+    "SUSPICIOUS_TLD": {
+      "title": "",
+      "description": ""
+    }
   },
   "admin_access": {
     "password_enabled": true,

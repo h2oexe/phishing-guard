@@ -423,8 +423,10 @@
 
     renderRuleWeightCards(displayRuleWeights, config.disabled_rules || []);
     renderDisabledRuleToggles(displayRuleWeights, config.disabled_rules || []);
-    renderLabelRows(config.rule_chip_labels || {});
+    renderLabelRows(config.rule_chip_labels || {}, config.rule_display_meta || {});
     renderCustomPhraseCards(config);
+    applyBuiltInDisplayMeta(config.rule_display_meta || {});
+    normalizeCustomRuleSection();
     bindDirtyTracking();
     renderAdvancedListsState();
   }
@@ -542,7 +544,8 @@
 
     if (sectionName === "labelsSection") {
       return {
-        rule_chip_labels: collectLabelRows()
+        rule_chip_labels: collectLabelRows(),
+        rule_display_meta: collectDisplayMetaRows()
       };
     }
 
@@ -674,38 +677,43 @@
     renderKeyValueInputs("ruleWeightsGrid", entries, "weight-", "rulesSection", disabledRules || []);
   }
 
-  function renderLabelRows(entries) {
+  function renderLabelRows(entries, displayMeta) {
     var container = document.getElementById("chipLabelsGrid");
     clearChildren(container);
+    displayMeta = displayMeta || {};
 
     var keys = Object.keys(entries).sort();
     var i;
     for (i = 0; i < keys.length; i += 1) {
-      appendLabelRow(container, keys[i], entries[keys[i]]);
+      appendLabelRow(container, keys[i], entries[keys[i]], displayMeta[keys[i]] || {});
     }
 
     if (keys.length === 0) {
-      appendLabelRow(container, "", "");
+      appendLabelRow(container, "", "", {});
     }
   }
 
-  function appendLabelRow(container, key, value) {
+  function appendLabelRow(container, key, value, meta) {
     var row = document.createElement("div");
-    row.className = "label-row";
-
-    row.appendChild(createField("Kural Anahtarı", "label-key-input", key || "", "ORNEK_ETIKET", "labelsSection"));
-    row.appendChild(createField("Etiket", "label-value-input", value || "", "Etiket Adı", "labelsSection"));
-
     var actionWrap = document.createElement("div");
-    actionWrap.className = "label-row-action";
     var removeButton = document.createElement("button");
+    var icon = document.createElement("span");
+
+    row.className = "label-row";
+    meta = meta || {};
+
+    row.appendChild(createField("Kural Anahtar\u0131", "label-key-input", key || "", "ORNEK_ETIKET", "labelsSection"));
+    row.appendChild(createField("Etiket", "label-value-input", value || "", "Etiket Ad\u0131", "labelsSection"));
+    row.appendChild(createField("Ba\u015fl\u0131k", "label-title-input", meta.title || "", "Kart Ba\u015fl\u0131\u011f\u0131", "labelsSection"));
+    row.appendChild(createField("A\u00e7\u0131klama", "label-description-input", meta.description || "", "K\u0131sa a\u00e7\u0131klama", "labelsSection"));
+
+    actionWrap.className = "label-row-action";
     removeButton.type = "button";
     removeButton.className = "danger-icon-button";
-    removeButton.title = "Etiketi kaldır";
-    removeButton.setAttribute("aria-label", "Etiketi kaldır");
-    var icon = document.createElement("span");
+    removeButton.title = "Etiketi kald\u0131r";
+    removeButton.setAttribute("aria-label", "Etiketi kald\u0131r");
     icon.className = "danger-icon-glyph";
-    icon.appendChild(document.createTextNode("×"));
+    icon.appendChild(document.createTextNode("\u00d7"));
     removeButton.appendChild(icon);
     removeButton.onclick = function () {
       openDeleteModal(row);
@@ -737,7 +745,7 @@
   }
 
   function addEmptyLabelRow() {
-    appendLabelRow(document.getElementById("chipLabelsGrid"), "", "");
+    appendLabelRow(document.getElementById("chipLabelsGrid"), "", "", {});
     markDirty("labelsSection");
   }
 
@@ -772,7 +780,7 @@
   function ensureAtLeastOneLabelRow() {
     var container = document.getElementById("chipLabelsGrid");
     if (!container.children.length) {
-      appendLabelRow(container, "", "");
+      appendLabelRow(container, "", "", {});
     }
   }
 
@@ -788,6 +796,26 @@
         values[key] = value;
       }
     }
+    return values;
+  }
+
+  function collectDisplayMetaRows() {
+    var rows = document.querySelectorAll("#chipLabelsGrid .label-row");
+    var values = {};
+    var i;
+
+    for (i = 0; i < rows.length; i += 1) {
+      var key = rows[i].querySelector(".label-key-input").value.trim();
+      var title = rows[i].querySelector(".label-title-input").value.trim();
+      var description = rows[i].querySelector(".label-description-input").value.trim();
+      if (key) {
+        values[key] = {
+          title: title,
+          description: description
+        };
+      }
+    }
+
     return values;
   }
 
@@ -812,13 +840,14 @@
     var panel = document.getElementById("advancedListsPanel");
     var button = document.getElementById("toggleAdvancedListsButton");
     panel.className = state.advancedListsVisible ? "advanced-lists-panel" : "advanced-lists-panel hidden";
-    button.textContent = state.advancedListsVisible ? "Tümünü Gizle" : "Tümünü Göster";
+    button.textContent = state.advancedListsVisible ? "T\u00fcm\u00fcn\u00fc Gizle" : "T\u00fcm\u00fcn\u00fc G\u00f6ster";
   }
 
   function renderCustomPhraseCards(config) {
     var section = document.getElementById("customRulePhrasesSection");
     var container = document.getElementById("customRulePhrasesGrid");
     var ruleLabels = config.rule_chip_labels || {};
+    var displayMeta = config.rule_display_meta || {};
     var customPhraseMap = (config.phrases && config.phrases.custom_rule_phrases) || {};
     var customRuleIds = getCustomRuleIds(config);
     var i;
@@ -836,12 +865,38 @@
       container.appendChild(createCustomPhraseCard(
         customRuleIds[i],
         ruleLabels[customRuleIds[i]] || customRuleIds[i],
+        displayMeta[customRuleIds[i]] || {},
         customPhraseMap[customRuleIds[i]] || []
       ));
     }
   }
 
-  function createCustomPhraseCard(ruleId, labelText, values) {
+  function normalizeCustomRuleSection() {
+    var section = document.getElementById("customRulePhrasesSection");
+    var advancedPanel = document.getElementById("advancedListsPanel");
+    var kicker;
+    var title;
+
+    if (!section || !advancedPanel || !advancedPanel.parentNode) {
+      return;
+    }
+
+    if (section.previousElementSibling !== advancedPanel) {
+      advancedPanel.parentNode.insertBefore(section, advancedPanel.nextSibling);
+    }
+
+    kicker = section.querySelector(".section-kicker");
+    title = section.querySelector("h2");
+
+    if (kicker) {
+      kicker.textContent = "\u00d6ZEL KAYITLAR";
+    }
+    if (title) {
+      title.textContent = "\u00d6ZEL KURAL \u0130FADELER\u0130";
+    }
+  }
+
+  function createCustomPhraseCard(ruleId, labelText, displayMeta, values) {
     var card = document.createElement("article");
     var title = document.createElement("div");
     var copy = document.createElement("p");
@@ -849,21 +904,22 @@
     var textarea = document.createElement("textarea");
 
     card.className = "module-card";
+    displayMeta = displayMeta || {};
 
     title.className = "module-title";
-    title.appendChild(document.createTextNode(ruleId));
+    title.appendChild(document.createTextNode(displayMeta.title || ruleId));
 
     copy.className = "module-copy";
-    copy.appendChild(document.createTextNode("Etiket adÄ±: " + labelText));
+    copy.appendChild(document.createTextNode(displayMeta.description || ("Etiket ad\u0131: " + labelText)));
 
     label.setAttribute("for", "customPhrase-" + ruleId);
-    label.appendChild(document.createTextNode("Ä°FADE LÄ°STESÄ°"));
+    label.appendChild(document.createTextNode("\u0130FADE L\u0130STES\u0130"));
 
     textarea.id = "customPhrase-" + ruleId;
     textarea.className = "custom-phrase-textarea";
     textarea.setAttribute("data-rule-id", ruleId);
     textarea.rows = 8;
-    textarea.placeholder = "Bu kuralla ilgili ifadeleri her satÄ±ra ayrÄ± yazÄ±n";
+    textarea.placeholder = "Bu kuralla ilgili ifadeleri her sat\u0131ra ayr\u0131 yaz\u0131n";
     textarea.value = toLines(values);
     textarea.oninput = createSectionDirtyHandler("listsSection");
     textarea.onchange = createSectionDirtyHandler("listsSection");
@@ -874,6 +930,82 @@
     card.appendChild(textarea);
 
     return card;
+  }
+
+  function applyBuiltInDisplayMeta(displayMeta) {
+    var meta = displayMeta || {};
+    var fieldMap = {
+      phishingKeywords: "PHISHING_KEYWORDS",
+      urgencyPhrases: "URGENCY_LANGUAGE",
+      accountThreatPhrases: "ACCOUNT_THREAT_LANGUAGE",
+      extortionPhrases: "EXTORTION_LANGUAGE",
+      attachmentRequestPhrases: "UNEXPECTED_ATTACHMENT_REQUEST",
+      paymentRequestPhrases: "PAYMENT_REQUEST_LANGUAGE",
+      bankChangePhrases: "BANK_CHANGE_LANGUAGE",
+      invoicePressurePhrases: "INVOICE_PRESSURE_LANGUAGE"
+    };
+    var fieldId;
+
+    for (fieldId in fieldMap) {
+      if (Object.prototype.hasOwnProperty.call(fieldMap, fieldId)) {
+        applyDisplayMetaToFieldCard(fieldId, meta[fieldMap[fieldId]] || {});
+      }
+    }
+  }
+
+  function applyDisplayMetaToFieldCard(fieldId, meta) {
+    var field = document.getElementById(fieldId);
+    var card;
+    var title;
+    var copy;
+
+    if (!field) {
+      return;
+    }
+
+    card = findParentByClass(field, "module-card");
+    if (!card) {
+      return;
+    }
+
+    title = card.querySelector(".module-title");
+    copy = card.querySelector(".module-copy");
+
+    if (title && meta.title) {
+      title.textContent = meta.title;
+    }
+
+    if (copy) {
+      copy.textContent = meta.description || buildDefaultModuleDescription(fieldId);
+    }
+  }
+
+  function buildDefaultModuleDescription(fieldId) {
+    var defaults = {
+      phishingKeywords: "Metin tabanl\u0131 sinyalleri etkiler.",
+      urgencyPhrases: "Zaman bask\u0131s\u0131 olu\u015fturan metinleri y\u00f6netir.",
+      accountThreatPhrases: "Hesap kapanmas\u0131 veya ask\u0131ya alma s\u00f6ylemlerini y\u00f6netir.",
+      extortionPhrases: "Dosya \u015fifreleme, veri s\u0131zd\u0131rma veya eri\u015fim kayb\u0131 tehdidi i\u00e7eren metinleri y\u00f6netir.",
+      attachmentRequestPhrases: "Ek dosya a\u00e7maya y\u00f6nlendiren c\u00fcmleleri tutar.",
+      paymentRequestPhrases: "\u00d6deme ve dekont \u00e7a\u011fr\u0131lar\u0131n\u0131 y\u00f6netir.",
+      bankChangePhrases: "IBAN veya banka hesab\u0131 de\u011fi\u015fikli\u011fi sinyallerini y\u00f6netir.",
+      invoicePressurePhrases: "S\u00fcre bask\u0131s\u0131 ve fatura takibi s\u00f6ylemlerini y\u00f6netir."
+    };
+
+    return defaults[fieldId] || "";
+  }
+
+  function findParentByClass(node, className) {
+    var current = node ? node.parentNode : null;
+
+    while (current) {
+      if (current.classList && current.classList.contains(className)) {
+        return current;
+      }
+      current = current.parentNode;
+    }
+
+    return null;
   }
 
   function renderKeyValueInputs(containerId, entries, prefix, sectionName, disabledRules) {
