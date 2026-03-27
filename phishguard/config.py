@@ -9,6 +9,7 @@ RULE_WEIGHTS = {
     "IP_LINK": 30,
     "URGENCY_LANGUAGE": 15,
     "ACCOUNT_THREAT_LANGUAGE": 18,
+    "EXTORTION_LANGUAGE": 26,
     "UNEXPECTED_ATTACHMENT_REQUEST": 20,
     "PAYMENT_REQUEST_LANGUAGE": 18,
     "BANK_CHANGE_LANGUAGE": 22,
@@ -47,6 +48,19 @@ SUSPICIOUS_ATTACHMENT_EXTENSIONS = {
     ".bat",
     ".docm",
     ".xlsm",
+}
+
+DOUBLE_EXTENSION_BAIT_EXTENSIONS = {
+    ".csv",
+    ".doc",
+    ".docx",
+    ".jpeg",
+    ".jpg",
+    ".pdf",
+    ".png",
+    ".txt",
+    ".xls",
+    ".xlsx",
 }
 
 PHISHING_KEYWORDS = {
@@ -105,6 +119,26 @@ ACCOUNT_THREAT_PHRASES = {
     "kimliğinizi doğrulayın",
     "kisisel verilerinizi koruyun",
     "kişisel verilerinizi koruyun",
+}
+
+EXTORTION_PHRASES = {
+    "encrypt",
+    "encrypted",
+    "encrypt your files",
+    "your files will be encrypted",
+    "ransom",
+    "pay or lose access",
+    "we will leak your data",
+    "dosyalariniz encryptlenecek",
+    "dosyalarınız encryptlenecek",
+    "dosyalariniz sifrelenecek",
+    "dosyalarınız şifrelenecek",
+    "sifreleyecegiz",
+    "şifreleyeceğiz",
+    "odeme yapmazsan",
+    "ödeme yapmazsan",
+    "erisiminiz kapatilacak",
+    "erişiminiz kapatılacak",
 }
 
 ATTACHMENT_REQUEST_PHRASES = {

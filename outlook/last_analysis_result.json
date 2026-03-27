@@ -1,63 +1,44 @@
 {
-  "score": 84,
-  "level": "High Risk",
-  "summary": "Bu e-posta phishing olabilir",
+  "score": 60,
+  "level": "Yüksek Risk",
+  "summary": "Bu ileti kimlik avı veya dolandırıcılık girişimi olabilir.",
   "matched_rules": [
-    "DOMAIN_LINK_MISMATCH",
-    "DISPLAY_TARGET_MISMATCH",
-    "PHISHING_KEYWORDS",
-    "URGENCY_LANGUAGE",
-    "INVOICE_PRESSURE_LANGUAGE"
+    "EXTORTION_LANGUAGE",
+    "PAYMENT_REQUEST_LANGUAGE",
+    "BANK_CHANGE_LANGUAGE"
   ],
   "reasons": [
-    "Gonderen domaini ile link domaini uyusmuyor",
-    "Gorunen link ile gercek hedef farkli",
-    "Supheli ifadeler tespit edildi",
-    "Baski ve zaman baskisi olusturan ifadeler tespit edildi"
+    "Şantaj, veri şifreleme veya erişim kaybı tehdidi içeren ifadeler bulundu",
+    "Ödeme veya fatura talebi içeren ifadeler bulundu",
+    "IBAN veya banka bilgisi değişikliği bildirimi bulundu"
   ],
   "details": {
-    "sender_domain": "gmail.com",
-    "link_domains": [
-      "sasa-com-tr.fortimailcloud.com"
-    ],
+    "sender_domain": "sasa.com.tr",
+    "link_domains": [],
+    "raw_score": 66,
+    "normalized_score": 44,
+    "normalization_base": 151,
     "confidence_counts": {
-      "low": 2,
+      "low": 0,
       "medium": 2,
       "high": 1
     },
+    "intensity": "yüksek",
     "rule_details": {
-      "DOMAIN_LINK_MISMATCH": {
-        "domains": [
-          "sasa-com-tr.fortimailcloud.com"
-        ]
-      },
-      "DISPLAY_TARGET_MISMATCH": {
-        "mismatches": [
-          "info@seninevin.com.tr -> ",
-          "www.seninevin.com.tr -> sasa-com-tr.fortimailcloud.com"
-        ]
-      },
-      "PHISHING_KEYWORDS": {
-        "keywords": [
-          "acil",
-          "askıya",
-          "doğrula",
-          "giriş",
-          "guvenlik",
-          "güvenlik",
-          "hemen"
-        ]
-      },
-      "URGENCY_LANGUAGE": {
+      "EXTORTION_LANGUAGE": {
         "phrases": [
-          "24 saat içinde",
-          "acil",
-          "hemen"
+          "encrypt",
+          "ödeme yapmazsan"
         ]
       },
-      "INVOICE_PRESSURE_LANGUAGE": {
+      "PAYMENT_REQUEST_LANGUAGE": {
         "phrases": [
-          "24 saat içinde"
+          "ödeme"
+        ]
+      },
+      "BANK_CHANGE_LANGUAGE": {
+        "phrases": [
+          "iban"
         ]
       }
     }

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PhishGuard Yönetim Paneli</title>
+    <link rel="stylesheet" href="/admin/admin.css?v=16" />
+  </head>
+  <body>
+    <main class="console-shell">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="sidebar-title">PHISHGUARD</div>
+          <div class="sidebar-subtitle">GÜVENLİK KONTROL KATMANI</div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button class="nav-item" type="button" data-target="overviewSection">GENEL BAKIŞ</button>
+          <button class="nav-item is-active" type="button" data-target="versionSection">SÜRÜM</button>
+          <button class="nav-item" type="button" data-target="rulesSection">KURAL MOTORU</button>
+          <button class="nav-item" type="button" data-target="listsSection">KAYITLAR</button>
+          <button class="nav-item" type="button" data-target="labelsSection">ETİKETLER</button>
+          <button class="nav-item" type="button" data-target="securitySection">GÜVENLİK</button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="sidebar-meta-label">DURUM</div>
+          <div id="sidebarStatus" class="sidebar-status">GÜNCEL</div>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <div class="eyebrow">TEMEL YAPILANDIRMA</div>
+            <h1>SİSTEM AYARLARI</h1>
+          </div>
+          <div class="topbar-actions">
+            <div id="flashMessage" class="flash-message hidden"></div>
+            <button id="saveButton" class="primary-button" type="button">TÜMÜNÜ KAYDET</button>
+          </div>
+        </header>
+
+        <section id="overviewSection" class="summary-grid">
+          <article class="summary-card">
+            <span class="summary-label">UYGULAMA SÜRÜMÜ</span>
+            <strong id="summaryVersion" class="summary-value">1.0.0</strong>
+          </article>
+          <article class="summary-card">
+            <span class="summary-label">SÜRÜM NOTU</span>
+            <strong id="summaryVersionNote" class="summary-value summary-note">Henüz not eklenmedi</strong>
+          </article>
+          <article class="summary-card">
+            <span class="summary-label">SON GÜNCELLEME</span>
+            <strong id="summaryUpdatedAt" class="summary-value">Bekleniyor</strong>
+          </article>
+          <article class="summary-card">
+            <span class="summary-label">AKTİF KURAL SAYISI</span>
+            <strong id="summaryRuleCount" class="summary-value">0</strong>
+          </article>
+        </section>
+
+        <section id="versionSection" class="panel-block">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">SİSTEM ÇEKİRDEĞİ</div>
+              <h2>SÜRÜM VE EŞİKLER</h2>
+            </div>
+            <div class="section-actions">
+              <div class="section-status">
+                <span>DURUM:</span>
+                <strong class="save-state-text" data-section="versionSection">Güncel</strong>
+              </div>
+              <button class="secondary-button section-save-button" type="button" data-section="versionSection">BÖLÜMÜ KAYDET</button>
+            </div>
+          </div>
+
+          <div class="module-grid">
+            <article class="module-card">
+              <div class="module-title">UYGULAMA SÜRÜMÜ</div>
+              <p class="module-copy">Tüm kullanıcıların göreceği ortak sürüm bilgisi.</p>
+              <label for="appVersion">SÜRÜM METNİ</label>
+              <input id="appVersion" type="text" placeholder="1.1.0" />
+
+              <label for="versionNote" class="field-top-gap">SÜRÜM NOTU</label>
+              <textarea id="versionNote" rows="4" placeholder="Örn. Yeni phishing keyword eklendi."></textarea>
+            </article>
+
+            <article class="module-card">
+              <div class="module-title">RİSK EŞİKLERİ</div>
+              <p class="module-copy">Skor aralıklarını merkezi olarak belirler.</p>
+              <div class="field-row">
+                <div class="field">
+                  <label for="lowRiskMax">DÜŞÜK RİSK ÜST SINIRI</label>
+                  <input id="lowRiskMax" type="number" min="0" max="100" />
+                </div>
+                <div class="field">
+                  <label for="mediumRiskMax">ORTA RİSK ÜST SINIRI</label>
+                  <input id="mediumRiskMax" type="number" min="0" max="100" />
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="rulesSection" class="panel-block">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">KURAL MOTORU</div>
+              <h2>AĞIRLIKLAR VE GEÇERSİZ KILMALAR</h2>
+            </div>
+            <div class="section-actions">
+              <div class="section-status">
+                <span>DURUM:</span>
+                <strong class="save-state-text" data-section="rulesSection">Güncel</strong>
+              </div>
+              <button class="secondary-button section-save-button" type="button" data-section="rulesSection">BÖLÜMÜ KAYDET</button>
+            </div>
+          </div>
+
+          <p id="ruleWeightsMeta" class="helper">Ham ağırlıkları düzenleyin; normalize katkı otomatik hesaplanır.</p>
+          <div id="ruleWeightsGrid" class="rule-card-grid"></div>
+
+          <div class="section-head compact">
+            <div>
+              <div class="section-kicker">KURAL AYARLARI</div>
+              <h2>DEVRE DIŞI KURALLAR</h2>
+            </div>
+          </div>
+          <div id="disabledRulesGrid" class="toggle-grid"></div>
+        </section>
+
+        <section id="listsSection" class="panel-block">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">KAYITLAR</div>
+              <h2>ALAN ADLARI VE ANAHTAR KELİMELER</h2>
+            </div>
+            <div class="section-actions">
+              <div class="section-status">
+                <span>DURUM:</span>
+                <strong class="save-state-text" data-section="listsSection">Güncel</strong>
+              </div>
+              <button class="secondary-button section-save-button" type="button" data-section="listsSection">BÖLÜMÜ KAYDET</button>
+            </div>
+          </div>
+
+          <div class="module-grid">
+            <article class="module-card">
+              <div class="module-title">ŞİRKET ALAN ADLARI</div>
+              <p class="module-copy">Güvenilir kurum alan adları.</p>
+              <label for="companyDomains">ALAN ADI LİSTESİ</label>
+              <textarea id="companyDomains" rows="8" placeholder="sasa.com.tr&#10;portal.sasa.com.tr"></textarea>
+            </article>
+
+            <article class="module-card">
+              <div class="module-title">KISA LİNK SERVİSLERİ</div>
+              <p class="module-copy">Kısa link servislerini burada yönetin.</p>
+              <label for="shortenerDomains">SERVİS LİSTESİ</label>
+              <textarea id="shortenerDomains" rows="8" placeholder="bit.ly&#10;tinyurl.com"></textarea>
+            </article>
+
+            <article class="module-card">
+              <div class="module-title">ŞÜPHELİ TLD LİSTESİ</div>
+              <p class="module-copy">Şüpheli alan uzantıları burada tutulur.</p>
+              <label for="suspiciousTlds">TLD LİSTESİ</label>
+              <textarea id="suspiciousTlds" rows="8" placeholder=".ru&#10;.xyz"></textarea>
+            </article>
+
+            <article class="module-card">
+              <div class="module-title">PHISHING ANAHTAR KELİMELERİ</div>
+              <p class="module-copy">Metin tabanlı sinyalleri etkiler.</p>
+              <label for="phishingKeywords">ANAHTAR KELİME LİSTESİ</label>
+              <textarea id="phishingKeywords" rows="8" placeholder="urgent&#10;verify&#10;ödeme"></textarea>
+            </article>
+
+            <article class="module-card">
+              <div class="module-title">ŞANTAJ VE ŞİFRELEME İFADELERİ</div>
+              <p class="module-copy">Dosya şifreleme, veri sızdırma veya erişim kaybı tehdidi içeren metinleri yönetir.</p>
+              <label for="extortionPhrases">İFADE LİSTESİ</label>
+              <textarea id="extortionPhrases" rows="8" placeholder="your files will be encrypted&#10;ödeme yapmazsan dosyaların şifrelenecek"></textarea>
+            </article>
+          </div>
+
+          <div id="customRulePhrasesSection" class="custom-rule-phrases hidden">
+            <div class="section-head compact">
+              <div>
+                <div class="section-kicker">ÖZEL KAYITLAR</div>
+                <h2>ÖZEL KURAL İFADELERİ</h2>
+              </div>
+            </div>
+            <div id="customRulePhrasesGrid" class="module-grid"></div>
+          </div>
+
+          <div class="advanced-toggle-row">
+            <button id="toggleAdvancedListsButton" class="secondary-button" type="button">Tümünü Göster</button>
+          </div>
+
+          <div id="advancedListsPanel" class="advanced-lists-panel hidden">
+            <div class="module-grid">
+              <article class="module-card">
+                <div class="module-title">İLİŞKİLİ GÜVENİLİR ALAN ADLARI</div>
+                <p class="module-copy">Genel güvenilir servis alan adları.</p>
+                <label for="trustedRelatedDomains">ALAN ADI LİSTESİ</label>
+                <textarea id="trustedRelatedDomains" rows="8" placeholder="office.com&#10;sharepoint.com"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">ACİLİYET İFADELERİ</div>
+                <p class="module-copy">Zaman baskısı oluşturan metinleri yönetir.</p>
+                <label for="urgencyPhrases">İFADE LİSTESİ</label>
+                <textarea id="urgencyPhrases" rows="8" placeholder="acil&#10;immediately"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">HESAP TEHDİDİ İFADELERİ</div>
+                <p class="module-copy">Hesap kapanması veya askıya alma söylemleri.</p>
+                <label for="accountThreatPhrases">İFADE LİSTESİ</label>
+                <textarea id="accountThreatPhrases" rows="8" placeholder="account suspended&#10;hesabınız askıya alınacak"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">EK AÇMA İFADELERİ</div>
+                <p class="module-copy">Ek dosya açmaya yönlendiren cümleleri tutar.</p>
+                <label for="attachmentRequestPhrases">İFADE LİSTESİ</label>
+                <textarea id="attachmentRequestPhrases" rows="8" placeholder="open the attached file&#10;ekteki dosyayı açın"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">ÖDEME TALEBİ İFADELERİ</div>
+                <p class="module-copy">Ödeme ve dekont çağrıları için kullanılır.</p>
+                <label for="paymentRequestPhrases">İFADE LİSTESİ</label>
+                <textarea id="paymentRequestPhrases" rows="8" placeholder="payment&#10;ödeme"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">BANKA DEĞİŞİKLİĞİ İFADELERİ</div>
+                <p class="module-copy">IBAN veya banka hesabı değişikliği sinyalleri.</p>
+                <label for="bankChangePhrases">İFADE LİSTESİ</label>
+                <textarea id="bankChangePhrases" rows="8" placeholder="new iban&#10;yeni iban"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">FATURA BASKISI İFADELERİ</div>
+                <p class="module-copy">Süre baskısı ve fatura takibi söylemleri.</p>
+                <label for="invoicePressurePhrases">İFADE LİSTESİ</label>
+                <textarea id="invoicePressurePhrases" rows="8" placeholder="within 24 hours&#10;bugün içinde"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">ŞÜPHELİ EK UZANTILARI</div>
+                <p class="module-copy">Doğrudan şüpheli kabul edilen ek türleri.</p>
+                <label for="suspiciousExtensions">UZANTI LİSTESİ</label>
+                <textarea id="suspiciousExtensions" rows="8" placeholder=".exe&#10;.js&#10;.docm"></textarea>
+              </article>
+
+              <article class="module-card">
+                <div class="module-title">ÇİFT UZANTI YEM DOSYALARI</div>
+                <p class="module-copy">Çift uzantı kontrolünde masum görünen ilk uzantılar.</p>
+                <label for="doubleExtensionBaitExtensions">UZANTI LİSTESİ</label>
+                <textarea id="doubleExtensionBaitExtensions" rows="8" placeholder=".pdf&#10;.xlsx&#10;.csv"></textarea>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="labelsSection" class="panel-block">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">GÖRÜNÜM EŞLEME</div>
+              <h2>ETİKET ADLARI</h2>
+            </div>
+            <div class="section-actions">
+              <div class="section-status">
+                <span>DURUM:</span>
+                <strong class="save-state-text" data-section="labelsSection">Güncel</strong>
+              </div>
+              <button class="secondary-button section-save-button" type="button" data-section="labelsSection">BÖLÜMÜ KAYDET</button>
+            </div>
+          </div>
+          <div class="labels-toolbar">
+            <p class="module-copy">Yeni etiket satırı ekleyebilir, mevcut etiketleri güncelleyebilir veya silebilirsiniz.</p>
+            <button id="addLabelButton" class="secondary-button" type="button">ETİKET EKLE</button>
+          </div>
+          <div id="chipLabelsGrid" class="label-row-list"></div>
+        </section>
+
+        <section id="securitySection" class="panel-block">
+          <div class="section-head">
+            <div>
+              <div class="section-kicker">YÖNETİM GÜVENLİĞİ</div>
+              <h2>YÖNETİM ARAÇLARI</h2>
+            </div>
+          </div>
+
+          <div class="module-grid security-grid">
+            <article class="module-card action-card">
+              <p class="module-copy">Parola ve sıfırlama işlemlerini bu bölümden yönetin.</p>
+              <span id="adminPasswordHintText" class="hidden"></span>
+
+              <div class="action-button-stack">
+                <button id="historyButton" class="secondary-button action-button" type="button">DEĞİŞİKLİK GEÇMİŞİ</button>
+                <button id="changePasswordButton" class="secondary-button action-button" type="button">PAROLA YENİLE</button>
+                <div class="security-alt-action">
+                  <span>veya</span>
+                  <button id="editHintButton" class="inline-text-button" type="button">ipucu girin</button>
+                </div>
+                <button id="resetDefaultsButton" class="footer-danger-button action-button" type="button">FABRİKA AYARLARINA DÖN</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <footer class="workspace-footer">
+          <div class="footer-left">
+            <span id="updatedAtText">Güncelleme bekleniyor</span>
+          </div>
+          <span>YAPI: PHISHGUARD CONTROL PLANE</span>
+        </footer>
+      </section>
+    </main>
+
+    <div id="deleteModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="modal-kicker">GÜVENLİK UYARISI</div>
+        <h3 id="deleteModalTitle">Etiket silme onayı</h3>
+        <p class="modal-copy">Bir etiket silmek istiyorsunuz. Bu işlem geri alınamaz.</p>
+        <div class="modal-actions">
+          <button id="cancelDeleteButton" class="secondary-button" type="button">İPTAL</button>
+          <button id="confirmDeleteButton" class="primary-button danger-button" type="button">SİL</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="saveModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="saveModalTitle">
+        <div class="modal-kicker">KAYDETME ONAYI</div>
+        <h3 id="saveModalTitle">Ayarlar kaydedilsin mi?</h3>
+        <p id="saveModalMessage" class="modal-copy">Yaptığınız değişiklikler kaydedilecek.</p>
+        <div class="modal-actions">
+          <button id="cancelSaveButton" class="secondary-button" type="button">İPTAL</button>
+          <button id="confirmSaveButton" class="primary-button" type="button">KAYDET</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="infoModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle">
+        <div class="modal-kicker">KONTROL UYARISI</div>
+        <h3 id="infoModalTitle">Eksik bilgi</h3>
+        <p id="infoModalMessage" class="modal-copy">Lütfen ilgili alanları kontrol ediniz.</p>
+        <div class="modal-actions">
+          <button id="closeInfoButton" class="primary-button" type="button">TAMAM</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loginModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card login-card" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
+        <div class="modal-kicker">YÖNETİM GİRİŞİ</div>
+        <h3 id="loginModalTitle">Parola doğrulaması gerekiyor</h3>
+        <div class="field">
+          <label for="loginPasswordInput">YÖNETİCİ PAROLASI</label>
+          <input id="loginPasswordInput" type="password" placeholder="Parolayı girin" />
+          <span id="loginHintText" class="inline-helper subtle-helper">İpucu tanımlı değil.</span>
+          <span id="loginPasswordError" class="inline-helper danger-helper hidden">Parola hatalı.</span>
+        </div>
+        <div class="modal-actions">
+          <button id="loginButton" class="primary-button" type="button">GİRİŞ YAP</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="resetModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="resetModalTitle">
+        <div class="modal-kicker">KRİTİK İŞLEM</div>
+        <h3 id="resetModalTitle">Fabrika ayarlarına dön</h3>
+        <p class="modal-copy">Devam etmek için önce yönetici parolasını giriniz.</p>
+
+        <div class="field">
+          <label for="resetPasswordInput">YÖNETİCİ PAROLASI</label>
+          <input id="resetPasswordInput" type="password" placeholder="Parolayı girin" />
+          <span id="resetPasswordError" class="inline-helper danger-helper hidden">Parola hatalı.</span>
+        </div>
+
+        <div id="resetConfirmBlock" class="hidden">
+          <p class="modal-copy reset-confirm-copy">İşlemi onaylıyorsanız aşağıdaki alana EVET yazın.</p>
+          <div class="field">
+            <label for="resetConfirmationInput">ONAY METNİ</label>
+            <input id="resetConfirmationInput" type="text" placeholder="EVET" />
+            <span class="inline-helper danger-helper">Bu işlem geri alınamaz.</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelResetButton" class="secondary-button" type="button">İPTAL</button>
+          <button id="verifyResetPasswordButton" class="secondary-button" type="button">PAROLAYI DOĞRULA</button>
+          <button id="confirmResetButton" class="primary-button danger-button hidden" type="button">SIFIRLA</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="changePasswordModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="changePasswordModalTitle">
+        <div class="modal-kicker">GÜVENLİK GÜNCELLEME</div>
+        <h3 id="changePasswordModalTitle">Parola yenile</h3>
+        <p class="modal-copy">Parolayı değiştirmek için mevcut parolanızı doğrulayın.</p>
+
+        <div class="field">
+          <label for="currentPasswordInput">ESKİ PAROLA</label>
+          <input id="currentPasswordInput" type="password" placeholder="Mevcut parolayı girin" />
+          <span id="currentPasswordError" class="inline-helper danger-helper hidden">Eski parola hatalı.</span>
+        </div>
+
+        <div class="field-row field-top-gap">
+          <div class="field">
+            <label for="newPasswordInput">YENİ PAROLA</label>
+            <input id="newPasswordInput" type="password" placeholder="Yeni parola" />
+          </div>
+          <div class="field">
+            <label for="confirmNewPasswordInput">YENİ PAROLA TEKRARI</label>
+            <input id="confirmNewPasswordInput" type="password" placeholder="Yeni parolayı tekrar girin" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelChangePasswordButton" class="secondary-button" type="button">İPTAL</button>
+          <button id="saveChangePasswordButton" class="primary-button" type="button">PAROLAYI KAYDET</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="hintModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card login-card" role="dialog" aria-modal="true" aria-labelledby="hintModalTitle">
+        <div class="modal-kicker">YÖNETİM İPUCU</div>
+        <h3 id="hintModalTitle">Parola ipucu gir</h3>
+        <p class="modal-copy">Bu alan giriş ekranında yöneticilere küçük bir hatırlatma olarak görünür.</p>
+
+        <div class="field">
+          <label for="hintInput">İPUCU METNİ</label>
+          <input id="hintInput" type="text" placeholder="Örn. Sadece güvenlik ekibi bilir." />
+        </div>
+
+        <div class="modal-actions">
+          <button id="cancelHintButton" class="secondary-button" type="button">İPTAL</button>
+          <button id="saveHintButton" class="primary-button" type="button">İPUCUNU KAYDET</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="historyModalOverlay" class="modal-overlay hidden">
+      <div class="modal-card history-card" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+        <div class="modal-kicker">DEĞİŞİKLİK GEÇMİŞİ</div>
+        <h3 id="historyModalTitle">Yapılan yönetim değişiklikleri</h3>
+        <div class="history-toolbar">
+          <div class="history-filter">
+            <label for="historyDateFilter">Tarih</label>
+            <select id="historyDateFilter">
+              <option value="all">Tümü</option>
+              <option value="today">Bugün</option>
+              <option value="7days">Son 7 gün</option>
+              <option value="30days">Son 30 gün</option>
+            </select>
+          </div>
+        </div>
+        <div id="historyList" class="history-list"></div>
+        <div class="modal-actions">
+          <button id="closeHistoryButton" class="primary-button" type="button">KAPAT</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/admin/admin.js?v=18"></script>
+  </body>
+</html>

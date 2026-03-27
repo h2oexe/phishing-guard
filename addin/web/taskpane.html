@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PhishGuard</title>
+    <link rel="stylesheet" href="/taskpane.css?v=17" />
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  </head>
+  <body>
+    <main class="panel">
+      <div class="topbar">
+        <div class="version-stack">
+          <span id="appVersionText" class="version-pill">Uygulama v1.0.0</span>
+        </div>
+        <button id="refreshButton" class="ghost-button" type="button">Yenile</button>
+      </div>
+
+      <section id="heroCard" class="hero-card low">
+        <h1 id="summaryText">Güvendesiniz</h1>
+        <p id="subText" class="hero-copy">PhishGuard bu e-postayı taradı ve önemli bir tehdit algılamadı.</p>
+
+        <section class="score-panel">
+          <div class="score-left">
+            <div id="scoreNumber" class="score-number">0</div>
+            <div class="score-caption">TEHDİT SKORU</div>
+          </div>
+          <div class="score-right">
+            <div class="score-readout">
+              <strong id="scoreText">0 / 100</strong>
+            </div>
+            <div class="progress-track">
+              <div id="scoreBar" class="progress-fill low" style="width: 0%"></div>
+            </div>
+          </div>
+        </section>
+
+        <button id="toggleReasonsButton" class="cta-button low" type="button">Sebebini Öğrenin</button>
+
+        <section id="reasonDrawer" class="reason-drawer hidden">
+          <div class="drawer-meta">
+            <span class="meta-label">Gösterilen İşaret</span>
+            <strong id="ruleCountText">0</strong>
+          </div>
+
+          <div id="signalList" class="signal-list">
+            <div class="signal-row">
+              <div class="signal-chip-wrap">
+                <span class="signal-triangle"></span>
+                <span class="signal-chip low">Güvenli Gönderi</span>
+              </div>
+              <div class="signal-copy">Şu an dikkat çeken belirgin bir risk işareti görünmüyor.</div>
+            </div>
+          </div>
+        </section>
+
+        <div id="statusText" class="status">Hazır</div>
+      </section>
+    </main>
+
+    <script src="/taskpane.js?v=17"></script>
+  </body>
+</html>

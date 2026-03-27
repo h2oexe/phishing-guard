@@ -26,6 +26,7 @@ class ExtractedLink:
 @dataclass(slots=True)
 class MailFeatures:
     sender_domain: str
+    attachments: list[str] = field(default_factory=list)
     links: list[ExtractedLink] = field(default_factory=list)
     link_domains: list[str] = field(default_factory=list)
     suspicious_tlds: list[str] = field(default_factory=list)
@@ -36,10 +37,12 @@ class MailFeatures:
     display_target_mismatches: list[str] = field(default_factory=list)
     urgency_hits: list[str] = field(default_factory=list)
     account_threat_hits: list[str] = field(default_factory=list)
+    extortion_hits: list[str] = field(default_factory=list)
     attachment_request_hits: list[str] = field(default_factory=list)
     payment_request_hits: list[str] = field(default_factory=list)
     bank_change_hits: list[str] = field(default_factory=list)
     invoice_pressure_hits: list[str] = field(default_factory=list)
+    custom_phrase_hits: dict[str, list[str]] = field(default_factory=dict)
 
 
 @dataclass(slots=True)

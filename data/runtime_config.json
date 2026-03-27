@@ -1,0 +1,326 @@
+{
+  "app_version": "1.0.0",
+  "version_note": "Ana Sürüm",
+  "updated_at": "2026-03-27T11:18:03.689886+00:00",
+  "change_history": [
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "14 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-27T11:18:03.689886+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Kural motoru",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "14 kural ağırlığı kaydedildi.",
+        "0 kural devre dışı bırakıldı."
+      ],
+      "timestamp": "2026-03-27T07:53:29.516842+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Sürüm ve eşikler",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "Uygulama sürümü: 1.0.0",
+        "Düşük risk üst sınırı: 24",
+        "Orta risk üst sınırı: 50",
+        "Sürüm notu eklendi."
+      ],
+      "timestamp": "2026-03-27T07:05:12.001585+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Alan adları ve anahtar kelimeler",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "Alan adı ve anahtar kelime listeleri güncellendi.",
+        "2 şirket alan adı kaydedildi.",
+        "23 phishing anahtar kelimesi kaydedildi."
+      ],
+      "timestamp": "2026-03-26T06:32:29.601650+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Alan adları ve anahtar kelimeler",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "Alan adı ve anahtar kelime listeleri güncellendi.",
+        "3 şirket alan adı kaydedildi.",
+        "23 phishing anahtar kelimesi kaydedildi."
+      ],
+      "timestamp": "2026-03-26T06:20:31.412537+00:00"
+    }
+  ],
+  "disabled_rules": [],
+  "rule_weights": {
+    "DOMAIN_LINK_MISMATCH": 10,
+    "DISPLAY_TARGET_MISMATCH": 35,
+    "SUSPICIOUS_TLD": 20,
+    "SHORTENER_LINK": 12,
+    "SUSPICIOUS_ATTACHMENT": 25,
+    "DOUBLE_EXTENSION": 35,
+    "PHISHING_KEYWORDS": 8,
+    "IP_LINK": 30,
+    "URGENCY_LANGUAGE": 15,
+    "ACCOUNT_THREAT_LANGUAGE": 18,
+    "EXTORTION_LANGUAGE": 26,
+    "UNEXPECTED_ATTACHMENT_REQUEST": 20,
+    "PAYMENT_REQUEST_LANGUAGE": 18,
+    "BANK_CHANGE_LANGUAGE": 22,
+    "INVOICE_PRESSURE_LANGUAGE": 16
+  },
+  "thresholds": {
+    "low_risk_max": 24,
+    "medium_risk_max": 50
+  },
+  "domains": {
+    "trusted_related_domains": [
+      "adobe.com",
+      "adobelogin.com",
+      "adobesign.com",
+      "docs.google.com",
+      "docusign.com",
+      "docusign.net",
+      "drive.google.com",
+      "dropbox.com",
+      "dropboxusercontent.com",
+      "google.com",
+      "googleapis.com",
+      "googleusercontent.com",
+      "microsoft.com",
+      "office.com",
+      "onedrive.live.com",
+      "outlook.com",
+      "powerbi.com",
+      "sharepoint.com",
+      "teams.microsoft.com",
+      "zoom.us"
+    ],
+    "company_trusted_domains": [
+      "sasa.com.tr",
+      "www.sasa.com.tr"
+    ],
+    "shortener_domains": [
+      "bit.ly",
+      "goo.gl",
+      "t.co",
+      "tinyurl.com"
+    ],
+    "suspicious_tlds": [
+      ".click",
+      ".ru",
+      ".tk",
+      ".top",
+      ".xyz"
+    ]
+  },
+  "attachments": {
+    "suspicious_extensions": [
+      ".bat",
+      ".cmd",
+      ".com",
+      ".cpl",
+      ".docm",
+      ".exe",
+      ".hta",
+      ".img",
+      ".iso",
+      ".jar",
+      ".js",
+      ".lnk",
+      ".msi",
+      ".pif",
+      ".ps1",
+      ".reg",
+      ".scr",
+      ".vb",
+      ".vbs",
+      ".wsf",
+      ".wsh",
+      ".xlsm"
+    ],
+    "double_extension_bait_extensions": [
+      ".csv",
+      ".doc",
+      ".docx",
+      ".jpeg",
+      ".jpg",
+      ".pdf",
+      ".png",
+      ".txt",
+      ".xls",
+      ".xlsx"
+    ]
+  },
+  "phrases": {
+    "phishing_keywords": [
+      "account",
+      "acil",
+      "askiya",
+      "askıya",
+      "confirm",
+      "dogrula",
+      "doğrula",
+      "giris",
+      "giriş",
+      "guvenlik",
+      "güvenlik",
+      "hemen",
+      "hesap",
+      "immediately",
+      "incele",
+      "login",
+      "password",
+      "security",
+      "sifre",
+      "suspended",
+      "urgent",
+      "verify",
+      "şifre"
+    ],
+    "urgency_phrases": [
+      "24 saat içinde",
+      "acil",
+      "act now",
+      "derhal",
+      "en kisa surede",
+      "en kısa sürede",
+      "hemen",
+      "immediately",
+      "urgent action required",
+      "within the next 24 hours"
+    ],
+    "account_threat_phrases": [
+      "account suspended",
+      "account will be suspended",
+      "confirm your identity",
+      "hesabiniz askiya alinacak",
+      "hesabiniz kilitlenecek",
+      "hesabınız askıya alınacak",
+      "hesabınız kilitlenecek",
+      "kimliginizi dogrulayin",
+      "kimliğinizi doğrulayın",
+      "kisisel verilerinizi koruyun",
+      "kişisel verilerinizi koruyun",
+      "protect your personal data",
+      "supheli giris",
+      "suspicious login attempts",
+      "temporarily locked",
+      "şüpheli giriş"
+    ],
+    "extortion_phrases": [
+      "encrypt",
+      "encrypted",
+      "encrypt your files",
+      "your files will be encrypted",
+      "ransom",
+      "pay or lose access",
+      "we will leak your data",
+      "dosyalariniz encryptlenecek",
+      "dosyalarınız encryptlenecek",
+      "dosyalariniz sifrelenecek",
+      "dosyalarınız şifrelenecek",
+      "sifreleyecegiz",
+      "şifreleyeceğiz",
+      "odeme yapmazsan",
+      "ödeme yapmazsan",
+      "erisiminiz kapatilacak",
+      "erişiminiz kapatılacak"
+    ],
+    "attachment_request_phrases": [
+      "attached file",
+      "attachment",
+      "download and open the attached file",
+      "ek dosya",
+      "eki acin",
+      "eki açın",
+      "ekte paylasildi",
+      "ekte paylaşıldı",
+      "ekteki dosya",
+      "ekteki dosyayi acin",
+      "ekteki dosyayı açın",
+      "open the attached file"
+    ],
+    "payment_request_phrases": [
+      "amount due",
+      "complete the payment",
+      "dekontu gönderin",
+      "dekontu iletin",
+      "fatura",
+      "invoice",
+      "make your payment",
+      "odeme",
+      "odemeyi yapin",
+      "odenmemis",
+      "outstanding invoice",
+      "payment",
+      "payment portal",
+      "send the receipt",
+      "ödeme",
+      "ödemeyi yapın",
+      "ödenmemiş"
+    ],
+    "bank_change_phrases": [
+      "account details",
+      "bank account update",
+      "bank details have been updated",
+      "banka hesap bilgilerimiz degisti",
+      "banka hesap bilgilerimiz değişti",
+      "hesap bilgilerimizde guncelleme",
+      "hesap bilgilerimizde güncelleme",
+      "hesap detaylari",
+      "hesap detayları",
+      "iban",
+      "new iban",
+      "new swift",
+      "swift",
+      "updated bank details",
+      "yeni iban",
+      "yeni swift"
+    ],
+    "invoice_pressure_phrases": [
+      "24 saat icinde",
+      "24 saat içinde",
+      "bugun icinde",
+      "bugün içinde",
+      "en kisa surede",
+      "en kısa sürede",
+      "gecikme faizi",
+      "hizmet kesintisi",
+      "late fee",
+      "mandatory update",
+      "service interruption",
+      "today",
+      "within 24 hours",
+      "zorunludur"
+    ]
+  },
+  "rule_chip_labels": {
+    "DOMAIN_LINK_MISMATCH": "Bağlantı Uyuşmazlığı",
+    "DISPLAY_TARGET_MISMATCH": "Sahte Hedef",
+    "SHORTENER_LINK": "Kısa Bağlantı",
+    "SUSPICIOUS_ATTACHMENT": "Şüpheli Ek",
+    "DOUBLE_EXTENSION": "Çift Uzantı",
+    "IP_LINK": "IP Bağlantısı",
+    "URGENCY_LANGUAGE": "Zaman Baskısı",
+    "ACCOUNT_THREAT_LANGUAGE": "Hesap Tehdidi",
+    "EXTORTION_LANGUAGE": "Şantaj Dili",
+    "UNEXPECTED_ATTACHMENT_REQUEST": "Ek Açma Talebi",
+    "PAYMENT_REQUEST_LANGUAGE": "Ödeme Talebi",
+    "BANK_CHANGE_LANGUAGE": "IBAN Değişikliği",
+    "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı",
+    "DENEME_ETIKET": "Deneme Etiket"
+  },
+  "admin_access": {
+    "password_enabled": true,
+    "password_hint": "admin",
+    "password_hash": "e2c2c1c524593ee085b466ae27cfe42c7d744854e394fbb415410ef81dade80b",
+    "password_salt": "5f2045a3cd3e0bdb3df84f6f42602103"
+  }
+}

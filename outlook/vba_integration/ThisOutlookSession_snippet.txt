@@ -1,0 +1,24 @@
+Option Explicit
+
+Private WithEvents mExplorer As Explorer
+Private WithEvents mInspectors As Inspectors
+
+Private Sub Application_Startup()
+    Set mExplorer = Application.ActiveExplorer
+    Set mInspectors = Application.Inspectors
+End Sub
+
+Private Sub mExplorer_SelectionChange()
+    On Error Resume Next
+    ExportSelectedMail.AnalyzeCurrentSelectedMailSilent
+End Sub
+
+Private Sub mInspectors_NewInspector(ByVal Inspector As Inspector)
+    On Error Resume Next
+
+    If Inspector Is Nothing Then Exit Sub
+    If TypeName(Inspector.CurrentItem) <> "MailItem" Then Exit Sub
+    If Not ExportSelectedMail.ShouldAnalyzeMail(Inspector.CurrentItem) Then Exit Sub
+
+    ExportSelectedMail.AnalyzeMailItem Inspector.CurrentItem, False, True
+End Sub

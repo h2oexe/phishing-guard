@@ -1,6 +1,6 @@
-# Balıkçı MVP
+# PhishGuard MVP
 
-This repository contains the first local analyzer prototype for Balıkçı.
+This repository contains the first local analyzer prototype for PhishGuard.
 
 ## Run
 
@@ -28,6 +28,25 @@ python analyze_outlook_export.py
 - Outlook export input: `outlook/last_selected_mail.json`
 - Analyzer output: `outlook/last_analysis_result.json`
 
+## Windows Setup Standard
+
+For multi-user Windows setups, PhishGuard now checks these user environment variables first:
+
+- `PHISHGUARD_ROOT`
+- `PHISHGUARD_PYTHON`
+
+Recommended setup:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1
+```
+
+If Python is not available through `py -3`, set it explicitly:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1 -PythonExe "C:\Path\To\python.exe"
+```
+
 ## Note
 
-The visible app name is `Balıkçı`. The internal Python package name remains `phishguard` for now so the working integration does not break.
+The visible app name is `PhishGuard`. The internal Python package name remains `phishguard`.
