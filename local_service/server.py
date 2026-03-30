@@ -245,10 +245,7 @@ class PhishGuardHandler(SimpleHTTPRequestHandler):
             if key == "admin_access":
                 merged["admin_access"] = build_admin_access_update(value, current.get("admin_access", {}))
                 continue
-            if isinstance(merged.get(key), dict) and isinstance(value, dict):
-                merged[key].update(value)
-            else:
-                merged[key] = value
+            merged[key] = value
 
         return merged
 

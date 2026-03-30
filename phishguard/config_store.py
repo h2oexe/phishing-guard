@@ -31,6 +31,69 @@ from phishguard.config import (
 
 BUILTIN_RULE_IDS = tuple(RULE_WEIGHTS.keys())
 
+BUILTIN_RULE_DISPLAY_META: dict[str, dict[str, str]] = {
+    "DOMAIN_LINK_MISMATCH": {
+        "title": "Alan Adı Uyuşmazlığı",
+        "description": "Bağlantı adresi ile mailin geldiği alan adı arasındaki farkı açıklar.",
+    },
+    "DISPLAY_TARGET_MISMATCH": {
+        "title": "Sahte Hedef Uyarısı",
+        "description": "Görünen bağlantı ile açılan gerçek adres arasındaki farkı açıklar.",
+    },
+    "SUSPICIOUS_TLD": {
+        "title": "Şüpheli Uzantı Uyarısı",
+        "description": "Riskli alan uzantıları içeren bağlantıları işaretler.",
+    },
+    "SHORTENER_LINK": {
+        "title": "Kısa Bağlantı Uyarısı",
+        "description": "Kısaltılmış bağlantı servislerinden gelen linkleri işaretler.",
+    },
+    "SUSPICIOUS_ATTACHMENT": {
+        "title": "Şüpheli Ek Uyarısı",
+        "description": "Yüksek riskli dosya uzantılarına sahip ekleri işaretler.",
+    },
+    "DOUBLE_EXTENSION": {
+        "title": "Çift Uzantı Uyarısı",
+        "description": "Dosya adında gizlenmiş uzantı kullanımı ihtimalini açıklar.",
+    },
+    "PHISHING_KEYWORDS": {
+        "title": "Phishing Anahtar Kelimeleri",
+        "description": "Metin tabanlı sinyalleri etkiler.",
+    },
+    "IP_LINK": {
+        "title": "IP Bağlantısı Uyarısı",
+        "description": "Alan adı yerine doğrudan IP adresine giden bağlantıları işaretler.",
+    },
+    "URGENCY_LANGUAGE": {
+        "title": "Aciliyet İfadeleri",
+        "description": "Zaman baskısı oluşturan metinleri yönetir.",
+    },
+    "ACCOUNT_THREAT_LANGUAGE": {
+        "title": "Hesap Tehdidi İfadeleri",
+        "description": "Hesap kapanması veya askıya alma söylemlerini yönetir.",
+    },
+    "EXTORTION_LANGUAGE": {
+        "title": "Şantaj ve Şifreleme İfadeleri",
+        "description": "Dosya şifreleme, veri sızdırma veya erişim kaybı tehdidi içeren metinleri yönetir.",
+    },
+    "UNEXPECTED_ATTACHMENT_REQUEST": {
+        "title": "Ek Açma İfadeleri",
+        "description": "Ek dosya açmaya yönlendiren cümleleri tutar.",
+    },
+    "PAYMENT_REQUEST_LANGUAGE": {
+        "title": "Ödeme Talebi İfadeleri",
+        "description": "Ödeme ve dekont çağrılarını yönetir.",
+    },
+    "BANK_CHANGE_LANGUAGE": {
+        "title": "Banka Değişikliği İfadeleri",
+        "description": "IBAN veya banka hesabı değişikliği sinyallerini yönetir.",
+    },
+    "INVOICE_PRESSURE_LANGUAGE": {
+        "title": "Fatura Baskısı İfadeleri",
+        "description": "Süre baskısı ve fatura takibi söylemlerini yönetir.",
+    },
+}
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / "data"
@@ -85,40 +148,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "BANK_CHANGE_LANGUAGE": "IBAN De\u011fi\u015fikli\u011fi",
         "INVOICE_PRESSURE_LANGUAGE": "Fatura Bask\u0131s\u0131"
     },
-    "rule_display_meta": {
-        "PHISHING_KEYWORDS": {
-            "title": "Phishing Anahtar Kelimeleri",
-            "description": "Metin tabanl\u0131 sinyalleri etkiler."
-        },
-        "URGENCY_LANGUAGE": {
-            "title": "Aciliyet \u0130fadeleri",
-            "description": "Zaman bask\u0131s\u0131 olu\u015fturan metinleri y\u00f6netir."
-        },
-        "ACCOUNT_THREAT_LANGUAGE": {
-            "title": "Hesap Tehdidi \u0130fadeleri",
-            "description": "Hesap kapanmas\u0131 veya ask\u0131ya alma s\u00f6ylemlerini y\u00f6netir."
-        },
-        "EXTORTION_LANGUAGE": {
-            "title": "\u015eantaj ve \u015eifreleme \u0130fadeleri",
-            "description": "Dosya \u015fifreleme, veri s\u0131zd\u0131rma veya eri\u015fim kayb\u0131 tehdidi i\u00e7eren metinleri y\u00f6netir."
-        },
-        "UNEXPECTED_ATTACHMENT_REQUEST": {
-            "title": "Ek A\u00e7ma \u0130fadeleri",
-            "description": "Ek dosya a\u00e7maya y\u00f6nlendiren c\u00fcmleleri tutar."
-        },
-        "PAYMENT_REQUEST_LANGUAGE": {
-            "title": "\u00d6deme Talebi \u0130fadeleri",
-            "description": "\u00d6deme ve dekont \u00e7a\u011fr\u0131lar\u0131n\u0131 y\u00f6netir."
-        },
-        "BANK_CHANGE_LANGUAGE": {
-            "title": "Banka De\u011fi\u015fikli\u011fi \u0130fadeleri",
-            "description": "IBAN veya banka hesab\u0131 de\u011fi\u015fikli\u011fi sinyallerini y\u00f6netir."
-        },
-        "INVOICE_PRESSURE_LANGUAGE": {
-            "title": "Fatura Bask\u0131s\u0131 \u0130fadeleri",
-            "description": "S\u00fcre bask\u0131s\u0131 ve fatura takibi s\u00f6ylemlerini y\u00f6netir."
-        }
-    },
+    "rule_display_meta": deepcopy(BUILTIN_RULE_DISPLAY_META),
     "admin_access": {
         "password_enabled": False,
         "password_hint": "",
@@ -273,6 +303,13 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     custom_rule_phrases = phrases.setdefault("custom_rule_phrases", {})
 
     custom_rule_ids = sorted(rule_id for rule_id in rule_labels if rule_id not in BUILTIN_RULE_IDS)
+
+    for rule_id, default_meta in BUILTIN_RULE_DISPLAY_META.items():
+        meta = rule_display_meta.setdefault(rule_id, {})
+        if not str(meta.get("title", "")).strip():
+            meta["title"] = default_meta["title"]
+        if not str(meta.get("description", "")).strip():
+            meta["description"] = default_meta["description"]
 
     for rule_id in custom_rule_ids:
         rule_weights.setdefault(rule_id, 0)

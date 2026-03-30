@@ -1,8 +1,62 @@
 {
   "app_version": "1.0.0",
   "version_note": "Ana Sürüm",
-  "updated_at": "2026-03-27T14:09:21.215394+00:00",
+  "updated_at": "2026-03-30T07:04:23.282179+00:00",
   "change_history": [
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "15 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-30T07:04:23.282179+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "16 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-30T07:04:04.658451+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "15 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-30T06:55:09.751295+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "16 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-30T06:53:52.314420+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "15 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-30T06:44:27.364871+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "15 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-30T06:44:08.556665+00:00"
+    },
     {
       "actor": "Yönetici",
       "section": "Etiket adları",
@@ -82,8 +136,7 @@
     "UNEXPECTED_ATTACHMENT_REQUEST": 20,
     "PAYMENT_REQUEST_LANGUAGE": 18,
     "BANK_CHANGE_LANGUAGE": 22,
-    "INVOICE_PRESSURE_LANGUAGE": 16,
-    "DENEME_ETIKET": 0
+    "INVOICE_PRESSURE_LANGUAGE": 16
   },
   "thresholds": {
     "low_risk_max": 24,
@@ -310,9 +363,7 @@
       "within 24 hours",
       "zorunludur"
     ],
-    "custom_rule_phrases": {
-      "DENEME_ETIKET": []
-    }
+    "custom_rule_phrases": {}
   },
   "rule_chip_labels": {
     "DOMAIN_LINK_MISMATCH": "Bağlantı Uyuşmazlığı",
@@ -329,8 +380,7 @@
     "UNEXPECTED_ATTACHMENT_REQUEST": "Ek Açma Talebi",
     "PAYMENT_REQUEST_LANGUAGE": "Ödeme Talebi",
     "BANK_CHANGE_LANGUAGE": "IBAN Değişikliği",
-    "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı",
-    "DENEME_ETIKET": "Deneme Etiket"
+    "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı"
   },
   "rule_display_meta": {
     "PHISHING_KEYWORDS": {
@@ -364,10 +414,6 @@
     "INVOICE_PRESSURE_LANGUAGE": {
       "title": "Fatura Baskısı İfadeleri",
       "description": "Süre baskısı ve fatura takibi söylemlerini yönetir."
-    },
-    "DENEME_ETIKET": {
-      "title": "Deneme Etiket",
-      "description": "Açıklama"
     },
     "DISPLAY_TARGET_MISMATCH": {
       "title": "",

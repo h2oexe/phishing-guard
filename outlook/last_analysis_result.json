@@ -1,44 +1,36 @@
 {
-  "score": 60,
-  "level": "Yüksek Risk",
-  "summary": "Bu ileti kimlik avı veya dolandırıcılık girişimi olabilir.",
+  "score": 15,
+  "level": "Düşük Risk",
+  "summary": "Düşük seviyede işaretler var, yine de temel kontrolleri yapın.",
   "matched_rules": [
-    "EXTORTION_LANGUAGE",
-    "PAYMENT_REQUEST_LANGUAGE",
-    "BANK_CHANGE_LANGUAGE"
+    "PHISHING_KEYWORDS",
+    "URGENCY_LANGUAGE"
   ],
   "reasons": [
-    "Şantaj, veri şifreleme veya erişim kaybı tehdidi içeren ifadeler bulundu",
-    "Ödeme veya fatura talebi içeren ifadeler bulundu",
-    "IBAN veya banka bilgisi değişikliği bildirimi bulundu"
+    "Şüpheli ifadeler tespit edildi",
+    "Zaman baskısı oluşturan ifadeler bulundu"
   ],
   "details": {
     "sender_domain": "sasa.com.tr",
     "link_domains": [],
-    "raw_score": 66,
-    "normalized_score": 44,
+    "raw_score": 23,
+    "normalized_score": 15,
     "normalization_base": 151,
     "confidence_counts": {
-      "low": 0,
-      "medium": 2,
-      "high": 1
+      "low": 1,
+      "medium": 1,
+      "high": 0
     },
-    "intensity": "yüksek",
+    "intensity": "düşük",
     "rule_details": {
-      "EXTORTION_LANGUAGE": {
-        "phrases": [
-          "encrypt",
-          "ödeme yapmazsan"
+      "PHISHING_KEYWORDS": {
+        "keywords": [
+          "acil"
         ]
       },
-      "PAYMENT_REQUEST_LANGUAGE": {
+      "URGENCY_LANGUAGE": {
         "phrases": [
-          "ödeme"
-        ]
-      },
-      "BANK_CHANGE_LANGUAGE": {
-        "phrases": [
-          "iban"
+          "acil"
         ]
       }
     }
