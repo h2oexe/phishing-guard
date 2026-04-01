@@ -15,7 +15,7 @@ Konum:
 Sorumluluklar:
 
 - mail verisini parse etmek
-- link ve attachment sinyallerini çıkarmak
+- link, ek ve header sinyallerini çıkarmak
 - metin tabanlı phrase eşleşmelerini üretmek
 - kuralları çalıştırmak
 - skoru normalize etmek
@@ -23,10 +23,10 @@ Sorumluluklar:
 
 Ana dosyalar:
 
-- `parser.py`
 - `extractor.py`
 - `rules.py`
 - `scorer.py`
+- `models.py`
 - `config_store.py`
 
 ### 2. Outlook VBA Bridge
@@ -42,6 +42,7 @@ Sorumluluklar:
 - yerel analyzer'ı tetiklemek
 - sonucu Outlook kategorisi olarak göstermek
 - otomatik analiz deneyimi sağlamak
+- header bilgilerini export etmek
 
 ### 3. Outlook Add-in Panel
 
@@ -56,7 +57,8 @@ Sorumluluklar:
 
 - detaylı risk panelini göstermek
 - skor, özet ve kullanıcı dostu işaretleri sunmak
-- add-in açıkken manuel/yeniden analiz imkanı vermek
+- add-in açıkken manuel veya otomatik yenileme yapmak
+- desktop Outlook'ta aynı mail için varsa VBA cache sonucunu tercih etmek
 
 ### 4. Admin Panel
 
@@ -69,9 +71,10 @@ Konum:
 Sorumluluklar:
 
 - kural ağırlıklarını yönetmek
-- phrase/domain listelerini güncellemek
+- phrase, domain, TLD, IBAN ve ek uzantısı listelerini güncellemek
 - özel kural ve etiket tanımlamak
-- sürüm notu girmek
+- görünen etiket, kart başlığı, kart açıklaması ve panel açıklamasını yönetmek
+- güvenli veya şüpheli kural türlerini belirlemek
 - parola ve yönetim araçlarını yönetmek
 - değişiklik geçmişini göstermek
 
@@ -86,6 +89,7 @@ Sorumluluklar:
 - add-in ve admin panel için HTTPS servis sağlamak
 - `/api/analyze`
 - `/api/meta`
+- `/api/outlook/cache`
 - `/api/admin/*`
   endpointlerini yönetmek
 
@@ -104,19 +108,28 @@ Admin panel tüm değişiklikleri `runtime_config.json` içine yazar. Çalışan
 ## Skor Mantığı
 
 - Kuralların ham ağırlıkları toplanır.
-- Aktif kuralların en yüksek ağırlıklarına göre normalize baz hesaplanır.
+- Aktif kuralların üst ağırlıklarına göre normalize baz hesaplanır.
 - Son skor `0-100` aralığına normalize edilir.
 - Son kullanıcı panelinde yalnızca normalize skor gösterilir.
 
 Bu yüzden admin panelde görülen ham ağırlık toplamı `100`'ü aşabilir; kullanıcıya çıkan skor ise aşmaz.
 
-## Özel Kural Akışı
+## Kural Sınıfları
 
-Admin panelden yeni bir etiket eklendiğinde sistem artık bunu yalnızca görüntü etiketi olarak değil, özel kural olarak işler.
+### Çekirdek kurallar
 
-Örnek:
+Sistem içinde hazır gelen kurallardır.
 
-- `DENEME_ETIKET`
+Örnekler:
+
+- link ve domain kuralları
+- attachment kuralları
+- sosyal mühendislik ve ödeme kuralları
+- `SPF`, `DKIM`, `DMARC` auth kuralları
+
+### Özel kurallar
+
+Admin panelden yeni bir etiket eklendiğinde sistem bunu yalnızca görüntü etiketi olarak değil, özel kural olarak işler.
 
 Bu kayıt:
 
@@ -125,6 +138,15 @@ Bu kayıt:
 - `Kayıtlar` bölümünde kendi phrase listesi alanına sahip olur
 - phrase eşleşirse analiz sonucunda gerçek kural olarak döner
 
+### Güvenli kurallar
+
+Özel bir kural `Güvenli` olarak tanımlanabilir.
+
+Bu durumda:
+
+- eşleştiğinde risk artırmaz
+- istenirse “mailde geçmiyorsa riski artır” davranışı da açılabilir
+
 ## Outlook Gösterim Mantığı
 
 ### Hızlı görünür uyarı
@@ -132,6 +154,7 @@ Bu kayıt:
 VBA tarafı, sonuç seviyesine göre Outlook kategorisi uygular:
 
 - Güvendesiniz
+- Düşük Risk
 - Orta Risk
 - Yüksek Risk
 
@@ -140,9 +163,9 @@ VBA tarafı, sonuç seviyesine göre Outlook kategorisi uygular:
 Add-in tarafı kullanıcıya:
 
 - skor
-- açıklama
-- işaretler
-- düz dilde nedenler
+- özet açıklama
+- sade işaretler
+- kullanıcı diliyle nedenler
 
 gösterir.
 
@@ -165,3 +188,5 @@ Sistemde şu anda çalışan ana başlıklar:
 - değişiklik geçmişi
 - fabrika ayarı
 - özel kural desteği
+- güvenli kural mantığı
+- `SPF`, `DKIM`, `DMARC` kontrolleri

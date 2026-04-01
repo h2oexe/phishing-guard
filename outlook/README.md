@@ -18,10 +18,11 @@ Bu klasör, Outlook 2016 üzerinde çalışan VBA tabanlı otomatik analiz köpr
 VBA akışı analiz sonucuna göre Outlook kategorisi uygular:
 
 - `PhishGuard - Güvendesiniz`
+- `PhishGuard - Düşük Risk`
 - `PhishGuard - Orta Risk`
 - `PhishGuard - Yüksek Risk`
 
-Bu kategori satırı, kullanıcının mail üstünde renkli bir uyarı çubuğu görmesini sağlar.
+Bu kategori satırı, kullanıcının mail üstünde renkli bir risk çubuğu görmesini sağlar.
 
 ## VBA Kurulumu
 
@@ -44,9 +45,10 @@ Bu kategori satırı, kullanıcının mail üstünde renkli bir uyarı çubuğu 
 
 1. Outlook seçilen maili okur.
 2. VBA gerekli alanları JSON'a aktarır.
-3. Yerel Python analiz motoru çalıştırılır.
-4. Analiz sonucu `last_analysis_result.json` içine yazılır.
-5. Sonuca göre Outlook kategorisi güncellenir.
+3. Mail header bilgisi de `transport_headers` alanı olarak export edilir.
+4. Yerel Python analiz motoru çalıştırılır.
+5. Analiz sonucu `last_analysis_result.json` içine yazılır.
+6. Sonuca göre Outlook kategorisi güncellenir.
 
 İstenirse aynı modül manuel olarak da çalıştırılabilir:
 
@@ -66,10 +68,8 @@ Yoksa yedek olarak:
 
 kullanılır.
 
-## İlgili Arayüz
+## Notlar
 
-Daha ayrıntılı kullanıcı görünümü için Outlook add-in tarafı kullanılır:
-
-- `addin/manifest.xml`
-- `addin/web/taskpane.html`
-- `addin/web/taskpane.js`
+- Otomatik kategori çubuğu `VBA` ile çalışır. Makrolar kapalıysa bu kısım çalışmaz.
+- Outlook sağ paneli ise ayrı olarak add-in tarafındadır.
+- Browser Outlook senaryosunda VBA çalışmayacağı için yalnızca add-in tarafı kullanılabilir.

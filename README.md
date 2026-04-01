@@ -1,13 +1,13 @@
 # PhishGuard
 
-PhishGuard, Outlook içindeki e-postaları yerel olarak analiz eden, phishing ve dolandırıcılık riskini kullanıcıya sade bir şekilde gösteren kural tabanlı bir masaüstü güvenlik yardımcısıdır.
+PhishGuard, Outlook içindeki e-postaları yerel olarak analiz eden, phishing ve dolandırıcılık riskini kullanıcıya sade şekilde gösteren kural tabanlı bir masaüstü güvenlik yardımcısıdır.
 
 ## Bileşenler
 
 - `phishguard/`
-  Analiz motoru, kural sistemi, extractor ve skorlayıcı
+  Analiz motoru, extractor, kurallar, skorlayıcı ve runtime config katmanı
 - `outlook/vba_integration/`
-  Outlook VBA köprüsü ve otomatik kategori uygulama akışı
+  Outlook VBA köprüsü ve otomatik kategori çubuğu akışı
 - `addin/`
   Outlook sağ panel eklentisi ve admin panel arayüzü
 - `local_service/`
@@ -19,17 +19,19 @@ PhishGuard, Outlook içindeki e-postaları yerel olarak analiz eden, phishing ve
 
 - Yerel analiz, dış servise veri çıkışı yok
 - Normalize edilmiş `0-100` risk skoru
-- `Düşük / Orta / Yüksek Risk` sınıflandırması
-- Outlook içinde otomatik kategori çubuğu
-- Sağ panelde ayrıntılı açıklama
+- `Güvendesiniz / Düşük / Orta / Yüksek Risk` görünümü
+- Outlook içinde otomatik renkli risk çubuğu
+- Sağ panelde sade açıklama ve sinyal listesi
 - Admin panelden:
   - kural ağırlığı değiştirme
-  - etiket yönetimi
-  - alan adı / keyword / phrase yönetimi
+  - phrase, domain, TLD ve ek uzantısı yönetimi
+  - etiket, başlık, açıklama ve panel açıklaması yönetimi
   - özel kural ekleme
+  - güvenli kural ve güvenli IBAN tanımlama
   - parola koruması
   - değişiklik geçmişi
-  - fabrika ayarlarına dönüş
+  - fabrika ayarına dönme
+- Header tabanlı `SPF`, `DKIM`, `DMARC` kontrolleri
 
 ## Çalışma Akışı
 
@@ -40,22 +42,25 @@ PhishGuard, Outlook içindeki e-postaları yerel olarak analiz eden, phishing ve
 - Python analiz motoru çalışır.
 - Sonuca göre Outlook kategorisi uygulanır:
   - `PhishGuard - Güvendesiniz`
+  - `PhishGuard - Düşük Risk`
   - `PhishGuard - Orta Risk`
   - `PhishGuard - Yüksek Risk`
 
 ### 2. Outlook sağ panel
 
 - Kullanıcı `Risk Analizi` butonuna basınca task pane açılır.
-- Panel, yerel servise mevcut maili gönderir.
+- Panel yerel servise mevcut maili gönderir.
+- Desktop Outlook senaryosunda, aynı mail için varsa VBA tarafından üretilmiş son cache sonucu tercih edilir.
 - Risk skoru, özet açıklama ve kullanıcı dostu işaretler gösterilir.
 
 ### 3. Admin panel
 
-- Admin panel yerel servis üzerinden açılır.
+- `https://localhost:3000/admin/` üzerinden açılır.
 - Ayarlar `runtime_config.json` içine kaydedilir.
-- Yeni eklenen özel etiketler artık sadece etiket listesinde değil:
+- Yeni eklenen özel kurallar yalnızca etiket listesinde kalmaz:
   - `Kural Motoru` bölümünde ağırlık kartı olarak
-  - `Kayıtlar` bölümünde özel ifade listesi olarak
+  - `Kayıtlar` bölümünde ifade listesi alanı olarak
+  - çalışma zamanında gerçek kural olarak
   görünür.
 
 ## Hızlı Başlatma
@@ -75,6 +80,12 @@ python analyze_outlook_export.py
 ```
 
 ### Yerel servis
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Users\stajyer_it1\Desktop\phish\local_service\start_https_service.ps1"
+```
+
+Alternatif:
 
 ```powershell
 python "C:\Users\stajyer_it1\Desktop\phish\local_service\server.py" --host localhost --port 3000 --cert-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-cert.pem" --key-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-key.pem"
@@ -103,7 +114,7 @@ powershell -ExecutionPolicy Bypass -File .\setup_phishguard_env.ps1
 
 ## Aktif Konfigürasyon
 
-Kod içindeki başlangıç ayarları:
+Başlangıç varsayılanları:
 
 - `phishguard/config.py`
 

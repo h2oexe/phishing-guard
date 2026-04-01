@@ -1,59 +1,42 @@
-# PhishGuard Ürün Özeti
+# PhishGuard Proje Özeti
 
-## Ürün Tanımı
+Bu dosya, proje sunumu veya hızlı iç onboarding için kısa özet niteliğindedir.
 
-PhishGuard, Outlook içinde görüntülenen e-postaları yerel olarak analiz eden ve kullanıcıya anlaşılır bir risk değerlendirmesi sunan kurumsal güvenlik yardımcısıdır.
+## Projenin Amacı
 
-## Ana Hedef
+PhishGuard, Outlook içinde açılan veya seçilen e-postaları yerel olarak analiz ederek phishing, ödeme dolandırıcılığı ve sosyal mühendislik risklerini kullanıcıya sade biçimde göstermeyi amaçlar.
 
-- Kullanıcının şüpheli e-postayı hızlı fark etmesini sağlamak
-- Phishing, ödeme dolandırıcılığı ve sosyal mühendislik sinyallerini sade biçimde göstermek
-- Kurum içinde yönetilebilir bir kural yapısı sunmak
+## Kullanıcıya Görünen İki Ana Katman
 
-## Bugünkü Ürün Kapsamı
+### 1. Outlook renkli risk çubuğu
 
-- Outlook otomatik analiz
-- Outlook kategori çubuğu
-- Outlook sağ panel
-- normalize skor
-- admin panel
-- sürüm yönetimi
-- değişiklik geçmişi
+- VBA ile çalışır
+- mail seçildiğinde otomatik analiz olur
+- sonuç Outlook kategorisi olarak görünür
+
+### 2. Outlook sağ panel
+
+- add-in ile çalışır
+- detaylı skor, açıklama ve işaretleri gösterir
+- admin panelden yönetilen etiket ve panel açıklamalarını kullanır
+
+## Yönetim Tarafı
+
+Admin panel üzerinden:
+
+- kural ağırlıkları
+- etiketler
+- panel açıklamaları
+- phrase ve domain listeleri
+- güvenli kurallar
+- güvenli IBAN listesi
 - parola koruması
-- özel kural ekleme
+- değişiklik geçmişi
 
-## Kullanıcı Deneyimi
+yönetilebilir.
 
-### Son kullanıcı
+## Teknik Not
 
-- Mail seçildiğinde ilk risk sinyalini Outlook içinde görür
-- İsterse `Risk Analizi` panelini açıp detayları inceler
-
-### Yönetici
-
-- Admin panelden kural ve liste günceller
-- Yeni etiket veya özel kural ekler
-- sürüm notu girer
-- değişiklik geçmişini görür
-- kritik işlemleri yönetir
-
-## Proje Mantığı
-
-Bu proje bir “tam SOC ürünü” değil, son kullanıcı karar desteği ürünüdür. Gücü:
-
-- açıklanabilir olması
-- yerelde çalışması
-- kurum içi özelleştirilebilir olması
-
-zayıf tarafı ise harici tehdit istihbaratı kullanmamasıdır.
-
-## Son Durum
-
-Proje MVP seviyesini aşmış, kurum içi pilot kullanım mantığına yaklaşmıştır. Bundan sonraki değerli geliştirmeler daha çok:
-
-- bakım kolaylığı
-- doğruluk kalibrasyonu
-- kullanıcı geri bildirimi
-- loglama ve raporlama
-
-tarafında olacaktır.
+- analiz tamamen yerelde çalışır
+- çalışan config `data/runtime_config.json` içindedir
+- Outlook VBA ve add-in birlikte kullanıldığında en güçlü masaüstü deneyimi elde edilir

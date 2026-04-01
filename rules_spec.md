@@ -9,7 +9,7 @@ Bu doküman, PhishGuard içinde çalışan güncel kural ailesini özetler. Kura
 - Tek bir zayıf sinyal yüksek risk üretmemelidir.
 - Ham ağırlıklar doğrudan son kullanıcı skoruna çevrilmez.
 - Son skor normalize edilir.
-- Kullanıcıya teknik kural adı değil, anlaşılır açıklama gösterilir.
+- Kullanıcıya teknik kural adı yerine anlaşılır etiket ve açıklama gösterilir.
 
 ## Çekirdek Kurallar
 
@@ -33,7 +33,7 @@ Bu doküman, PhishGuard içinde çalışan güncel kural ailesini özetler. Kura
 - `DOUBLE_EXTENSION`
   Çift uzantılı ek var.
 - `UNEXPECTED_ATTACHMENT_REQUEST`
-  Beklenmedik ek açma/indirme talebi var.
+  Beklenmedik ek açma veya indirme talebi var.
 
 ### Metin ve sosyal mühendislik kuralları
 
@@ -42,29 +42,64 @@ Bu doküman, PhishGuard içinde çalışan güncel kural ailesini özetler. Kura
 - `URGENCY_LANGUAGE`
   Zaman baskısı var.
 - `ACCOUNT_THREAT_LANGUAGE`
-  Hesap kapatma / güvenlik tehdidi dili var.
+  Hesap kapatma veya güvenlik tehdidi dili var.
 - `PAYMENT_REQUEST_LANGUAGE`
   Ödeme talebi var.
 - `BANK_CHANGE_LANGUAGE`
-  IBAN / banka bilgisi değişikliği var.
+  IBAN veya banka bilgisi değişikliği var.
 - `INVOICE_PRESSURE_LANGUAGE`
-  Fatura / süre baskısı var.
+  Fatura veya süre baskısı var.
 - `EXTORTION_LANGUAGE`
   Dosya şifreleme, erişim kaybı veya şantaj dili var.
 
+### Kimlik doğrulama kuralları
+
+- `SPF_FAIL`
+  SPF doğrulaması başarısız.
+- `SPF_SOFTFAIL`
+  SPF zayıf sonuç verdi.
+- `DKIM_FAIL`
+  DKIM imzası doğrulanamadı.
+- `DMARC_FAIL`
+  DMARC doğrulaması ve hizalaması başarısız.
+
+Bu kurallar mail header içindeki `Authentication-Results`, `ARC-Authentication-Results` ve `Received-SPF` satırlarından türetilir.
+
 ## Özel Kurallar
 
-Admin panelden eklenen her yeni etiket, gerekli ifadeler girildiğinde özel kural haline gelir.
+Admin panelden eklenen her yeni etiket, ilgili phrase listesi girildiğinde özel kural haline gelir.
 
 Örnek:
 
-- Etiket: `DENEME_ETIKET`
+- Etiket: `MEYVEETIKETI`
 - Ağırlık: `12`
 - İfade listesi:
-  - `örnek cümle`
-  - `deneme tetikleyici`
+  - `elma`
+  - `muz`
 
-Bu durumda sistem bu ifadeleri mail içinde arar ve eşleşme olursa `DENEME_ETIKET` gerçek bir kural olarak skora katkı verir.
+Bu durumda sistem bu ifadeleri mail içinde arar ve eşleşme olursa `MEYVEETIKETI` gerçek bir kural olarak skora katkı verir.
+
+## Güvenli Kurallar
+
+Özel kural türü `Güvenli` olarak seçilebilir.
+
+Bu durumda:
+
+- eşleşme risk artırmaz
+- istenirse “mailde geçmiyorsa riski artır” seçeneği açılabilir
+
+Bu yaklaşım güvenli domain, güvenli IBAN veya kurum içi güven işaretleri gibi senaryolarda kullanılır.
+
+## Güvenli Listeler
+
+Admin panelden ayrıca şu listeler yönetilir:
+
+- güvenilir kurum alan adları
+- ilişkili güvenilir alan adları
+- kısa link servisleri
+- şüpheli TLD listesi
+- phishing anahtar kelimeleri
+- güvenli IBAN listesi
 
 ## Güven Seviyesi
 
@@ -96,31 +131,25 @@ Bu nedenle:
 - admin panelde ağırlıkların toplamı `100`'ü aşabilir
 - kullanıcıya çıkan skor aşmaz
 
-## Admin Panel Üzerinden Yönetilen Alanlar
-
-- `rule_weights`
-- `disabled_rules`
-- `rule_chip_labels`
-- `domains.*`
-- `attachments.*`
-- `phrases.*`
-- `phrases.custom_rule_phrases`
-
 ## Kullanıcıya Gösterilen Yapı
 
-Panel tarafında mümkün olduğunca teknik isim yerine sade etiket ve açıklama gösterilir.
+Panel tarafında mümkün olduğunca teknik isim yerine sade etiket ve panel açıklaması gösterilir.
 
 Örnek:
 
 - `EXTORTION_LANGUAGE`
-  kullanıcıya `Dosya Şifreleme Tehdidi` olarak görünür
+  kullanıcıya `Şantaj Dili` veya yönetici tarafından verilen özel etiket adıyla görünebilir.
 
-## Güncel Not
+## Yönetilen Alanlar
 
-Yeni kural eklendiğinde sadece label listesinde kalmamalı; aynı kayıt:
+Admin panelden yönetilen ana alanlar:
 
-- `Kural Motoru`
-- `Kayıtlar`
-- çalışma zamanı analiz akışı
-
-içinde de görünür olmalıdır. Mevcut sistem bu davranışı destekleyecek şekilde güncellenmiştir.
+- `rule_weights`
+- `disabled_rules`
+- `rule_chip_labels`
+- `rule_display_meta`
+- `custom_rule_modes`
+- `custom_rule_missing_policies`
+- `domains.*`
+- `attachments.*`
+- `phrases.*`

@@ -21,6 +21,7 @@ Bu klasör, Outlook içindeki sağ panel deneyimini sağlayan add-in dosyaların
 
 - mevcut maili Office.js ile okur
 - `https://localhost:3000/api/analyze` endpoint'ine gönderir
+- desktop Outlook'ta aynı mail için varsa `/api/outlook/cache` üzerinden VBA sonucunu tercih eder
 - normalize skor ve kullanıcı dostu işaretleri gösterir
 
 ### Admin panel
@@ -34,7 +35,7 @@ Bu klasör, Outlook içindeki sağ panel deneyimini sağlayan add-in dosyaların
 Add-in'in çalışması için yerel HTTPS servis açık olmalıdır:
 
 ```powershell
-python "C:\Users\stajyer_it1\Desktop\phish\local_service\server.py" --host localhost --port 3000 --cert-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-cert.pem" --key-file "C:\Users\stajyer_it1\Desktop\phish\local_service\certs\localhost-key.pem"
+powershell -ExecutionPolicy Bypass -File "C:\Users\stajyer_it1\Desktop\phish\local_service\start_https_service.ps1"
 ```
 
 ## Yükleme
