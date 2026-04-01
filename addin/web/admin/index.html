@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>PhishGuard Yönetim Paneli</title>
-    <link rel="stylesheet" href="/admin/admin.css?v=18" />
+    <link rel="stylesheet" href="/admin/admin.css?v=26" />
   </head>
   <body>
     <main class="console-shell">
       <aside class="sidebar">
         <div class="sidebar-brand">
+          <div class="sidebar-brand-mark" aria-hidden="true"><span>PG</span></div>
           <div class="sidebar-title">PHISHGUARD</div>
           <div class="sidebar-subtitle">GÜVENLİK KONTROL KATMANI</div>
         </div>
@@ -31,13 +32,13 @@
 
       <section class="workspace">
         <header class="topbar">
-          <div>
+          <div class="topbar-copy">
             <div class="eyebrow">TEMEL YAPILANDIRMA</div>
             <h1>SİSTEM AYARLARI</h1>
+            <p class="page-intro">Merkezi güvenlik kurallarını, kayıtları ve görünüm eşlemelerini tek panelden yönetin.</p>
           </div>
           <div class="topbar-actions">
             <div id="flashMessage" class="flash-message hidden"></div>
-            <button id="saveButton" class="primary-button" type="button">TÜMÜNÜ KAYDET</button>
           </div>
         </header>
 
@@ -206,6 +207,13 @@
               </article>
 
               <article class="module-card">
+                <div class="module-title">Güvenli IBAN listesi</div>
+                <p class="module-copy">Kuruma ait güvenli IBAN değerlerini burada tutun.</p>
+                <label for="trustedIbans">IBAN LİSTESİ</label>
+                <textarea id="trustedIbans" rows="8" placeholder="TR120000000000000000000012"></textarea>
+              </article>
+
+              <article class="module-card">
                 <div class="module-title">Aciliyet ifadeleri</div>
                 <p class="module-copy">Zaman baskısı oluşturan metinleri yönetir.</p>
                 <label for="urgencyPhrases">İFADE LİSTESİ</label>
@@ -315,7 +323,7 @@
           <div class="footer-left">
             <span id="updatedAtText">Güncelleme bekleniyor</span>
           </div>
-          <span>YAPI: PHISHGUARD CONTROL PLANE</span>
+          <button id="saveButton" class="primary-button" type="button">Tümünü Kaydet</button>
         </footer>
       </section>
     </main>
@@ -470,6 +478,6 @@
       </div>
     </div>
 
-    <script src="/admin/admin.js?v=21"></script>
+    <script src="/admin/admin.js?v=39"></script>
   </body>
 </html>

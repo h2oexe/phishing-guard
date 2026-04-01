@@ -14,6 +14,10 @@ RULE_WEIGHTS = {
     "PAYMENT_REQUEST_LANGUAGE": 18,
     "BANK_CHANGE_LANGUAGE": 22,
     "INVOICE_PRESSURE_LANGUAGE": 16,
+    "SPF_FAIL": 20,
+    "SPF_SOFTFAIL": 10,
+    "DKIM_FAIL": 25,
+    "DMARC_FAIL": 35,
 }
 
 SUSPICIOUS_TLDS = {".ru", ".tk", ".xyz", ".top", ".click"}
@@ -183,8 +187,6 @@ BANK_CHANGE_PHRASES = {
     "new swift",
     "bank account update",
     "account details",
-    "iban",
-    "swift",
     "hesap bilgilerimizde guncelleme",
     "hesap bilgilerimizde güncelleme",
     "yeni iban",

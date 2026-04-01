@@ -19,6 +19,7 @@ def load_mail_input(path: Path) -> MailInput:
         sender_domain=payload.get("sender_domain", ""),
         body_text=payload.get("body_text", ""),
         body_html=payload.get("body_html", ""),
+        transport_headers=payload.get("transport_headers", ""),
         attachments=payload.get("attachments", []),
     )
 

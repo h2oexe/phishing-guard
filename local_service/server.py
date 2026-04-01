@@ -32,6 +32,8 @@ from phishguard.scorer import score_analysis  # noqa: E402
 
 
 ADMIN_TOKEN_HEADER = "X-PhishGuard-Admin-Token"
+OUTLOOK_EXPORT_PATH = REPO_ROOT / "outlook" / "last_selected_mail.json"
+OUTLOOK_RESULT_PATH = REPO_ROOT / "outlook" / "last_analysis_result.json"
 
 
 class PhishGuardHandler(SimpleHTTPRequestHandler):
@@ -62,6 +64,9 @@ class PhishGuardHandler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.path == "/api/meta":
             self._write_json(HTTPStatus.OK, get_public_meta())
+            return
+        if self.path == "/api/outlook/cache":
+            self._write_json(HTTPStatus.OK, self._get_outlook_cache())
             return
         if self.path == "/api/admin/access":
             self._write_json(HTTPStatus.OK, get_admin_access_public())
@@ -129,6 +134,7 @@ class PhishGuardHandler(SimpleHTTPRequestHandler):
                 sender_domain=str(payload.get("sender_domain", "")),
                 body_text=str(payload.get("body_text", "")),
                 body_html=str(payload.get("body_html", "")),
+                transport_headers=str(payload.get("transport_headers", "")),
                 attachments=[str(item) for item in attachments],
             )
             features = extract_features(mail)
@@ -276,6 +282,21 @@ class PhishGuardHandler(SimpleHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", f"Content-Type, {ADMIN_TOKEN_HEADER}")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
+
+    def _get_outlook_cache(self) -> dict:
+        return {
+            "mail": self._read_json_file(OUTLOOK_EXPORT_PATH),
+            "result": self._read_json_file(OUTLOOK_RESULT_PATH),
+        }
+
+    def _read_json_file(self, target: Path) -> dict:
+        if not target.exists():
+            return {}
+
+        try:
+            return json.loads(target.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
 
     def _write_json_error(self, status: HTTPStatus, message: str) -> None:
         self._write_json(status, {"error": message})

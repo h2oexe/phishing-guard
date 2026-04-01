@@ -21,7 +21,11 @@
     UNEXPECTED_ATTACHMENT_REQUEST: "Ek Açma Talebi",
     PAYMENT_REQUEST_LANGUAGE: "Ödeme Talebi",
     BANK_CHANGE_LANGUAGE: "IBAN Değişikliği",
-    INVOICE_PRESSURE_LANGUAGE: "Fatura Baskısı"
+    INVOICE_PRESSURE_LANGUAGE: "Fatura Baskısı",
+    SPF_FAIL: "SPF Hatası",
+    SPF_SOFTFAIL: "SPF Softfail",
+    DKIM_FAIL: "DKIM Hatası",
+    DMARC_FAIL: "DMARC Hatası"
   };
 
   var RULE_EXPLANATIONS = {
@@ -38,7 +42,11 @@
     UNEXPECTED_ATTACHMENT_REQUEST: "Beklenmedik bir ek dosyayı açmanız isteniyor.",
     PAYMENT_REQUEST_LANGUAGE: "Mail sizi ödeme yapmaya yönlendiriyor.",
     BANK_CHANGE_LANGUAGE: "Mail içinde IBAN veya banka bilgisi değişikliği var.",
-    INVOICE_PRESSURE_LANGUAGE: "Mail, ödeme veya fatura işlemi için zaman baskısı kuruyor."
+    INVOICE_PRESSURE_LANGUAGE: "Mail, ödeme veya fatura işlemi için zaman baskısı kuruyor.",
+    SPF_FAIL: "Gönderen sunucu, alan adı adına yetkili görünmüyor.",
+    SPF_SOFTFAIL: "Gönderen sunucu için zayıf bir SPF sonucu görüldü.",
+    DKIM_FAIL: "Mailin imza doğrulaması başarısız oldu; içerik değiştirilmiş olabilir.",
+    DMARC_FAIL: "Alan adı doğrulaması ve hizalaması başarısız görünüyor."
   };
 
   var state = {
@@ -98,9 +106,11 @@
           "/api/analyze",
           payload,
           function (result) {
-            state.refreshInFlight = false;
-            renderResult(result || {});
-            setStatus("Analiz güncel.");
+            resolvePreferredResult(payload, result || {}, function (preferredResult) {
+              state.refreshInFlight = false;
+              renderResult(preferredResult || {});
+              setStatus("Analiz güncel.");
+            });
           },
           function (error) {
             state.refreshInFlight = false;
@@ -117,6 +127,77 @@
         setStatus("Analiz şu anda tamamlanamadı.");
       }
     );
+  }
+
+  function resolvePreferredResult(currentPayload, liveResult, onResolved) {
+    requestJson(
+      "GET",
+      "/api/outlook/cache",
+      null,
+      function (cachePayload) {
+        var cachedMail = cachePayload && cachePayload.mail ? cachePayload.mail : null;
+        var cachedResult = cachePayload && cachePayload.result ? cachePayload.result : null;
+
+        if (isMatchingCachedMail(currentPayload, cachedMail) && isUsableCachedResult(cachedResult)) {
+          onResolved(cachedResult);
+          return;
+        }
+
+        onResolved(liveResult);
+      },
+      function () {
+        onResolved(liveResult);
+      }
+    );
+  }
+
+  function isUsableCachedResult(result) {
+    return !!(result && typeof result.score !== "undefined" && typeof result.level !== "undefined");
+  }
+
+  function isMatchingCachedMail(currentPayload, cachedMail) {
+    var currentSubject;
+    var cachedSubject;
+    var currentSender;
+    var cachedSender;
+    var currentBody;
+    var cachedBody;
+
+    if (!currentPayload || !cachedMail) {
+      return false;
+    }
+
+    currentSubject = normalizeCompareText(currentPayload.subject);
+    cachedSubject = normalizeCompareText(cachedMail.subject);
+    currentSender = normalizeCompareText(currentPayload.sender_email);
+    cachedSender = normalizeCompareText(cachedMail.sender_email);
+    currentBody = normalizeCompareText(snippetText(currentPayload.body_text));
+    cachedBody = normalizeCompareText(snippetText(cachedMail.body_text));
+
+    if (!currentSubject || !cachedSubject || currentSubject !== cachedSubject) {
+      return false;
+    }
+
+    if (!currentSender || !cachedSender || currentSender !== cachedSender) {
+      return false;
+    }
+
+    if (!currentBody || !cachedBody) {
+      return true;
+    }
+
+    return currentBody === cachedBody;
+  }
+
+  function snippetText(value) {
+    return String(value || "").slice(0, 200);
+  }
+
+  function normalizeCompareText(value) {
+    return String(value || "")
+      .replace(/\s+/g, " ")
+      .replace(/^\s+|\s+$/g, "")
+      .toLowerCase();
   }
 
   function startMailboxWatcher() {
@@ -357,6 +438,7 @@
   function buildSignalRows(result) {
     var matchedRules = result.matched_rules || [];
     var chipLabels = state.meta && state.meta.rule_chip_labels ? state.meta.rule_chip_labels : {};
+    var displayMeta = state.meta && state.meta.rule_display_meta ? state.meta.rule_display_meta : {};
     var seenLabels = {};
     var rows = [];
     var i;
@@ -378,7 +460,7 @@
       seenLabels[label] = true;
       rows.push({
         label: label,
-        explanation: buildPlainExplanation(matchedRules[i])
+        explanation: buildPlainExplanation(matchedRules[i], displayMeta)
       });
     }
 
@@ -416,7 +498,14 @@
     return wrapper;
   }
 
-  function buildPlainExplanation(ruleName) {
+  function buildPlainExplanation(ruleName, displayMeta) {
+    var meta = displayMeta && displayMeta[ruleName] ? displayMeta[ruleName] : null;
+    var description = meta && meta.panel_description ? String(meta.panel_description).trim() : "";
+
+    if (description && description !== "Yan panelde görünecek açıklama") {
+      return description;
+    }
+
     return RULE_EXPLANATIONS[ruleName] || "Bu sinyal, mail içinde dikkat gerektiren bir durum bulunduğunu gösteriyor.";
   }
 

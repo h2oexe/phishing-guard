@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   var ADMIN_TOKEN_KEY = "phishguard_admin_token";
   var RULE_DISPLAY_ORDER = [
     "DOMAIN_LINK_MISMATCH",
@@ -15,7 +15,11 @@
     "UNEXPECTED_ATTACHMENT_REQUEST",
     "PAYMENT_REQUEST_LANGUAGE",
     "BANK_CHANGE_LANGUAGE",
-    "INVOICE_PRESSURE_LANGUAGE"
+    "INVOICE_PRESSURE_LANGUAGE",
+    "SPF_FAIL",
+    "SPF_SOFTFAIL",
+    "DKIM_FAIL",
+    "DMARC_FAIL"
   ];
   var BUILTIN_RULE_KEYS = RULE_DISPLAY_ORDER.slice();
 
@@ -26,32 +30,93 @@
     labelsSection: "Etiket adları"
   };
 
+  var BUILTIN_PANEL_DESCRIPTION_FALLBACKS = {
+    DOMAIN_LINK_MISMATCH: "Bağlantı adresi, mailin geldiği alan adıyla uyuşmuyor.",
+    DISPLAY_TARGET_MISMATCH: "Görünen bağlantı ile açılan gerçek adres aynı görünmüyor.",
+    SUSPICIOUS_TLD: "Bağlantı, riskli alan adı uzantısı kullanıyor olabilir.",
+    SHORTENER_LINK: "Bağlantı kısa link servisinden geliyor; gerçek adres gizlenmiş olabilir.",
+    SUSPICIOUS_ATTACHMENT: "Ek dosya beklenmedik veya riskli bir uzantı taşıyor olabilir.",
+    DOUBLE_EXTENSION: "Ek dosya güvenli gibi görünse de gerçek uzantısı farklı olabilir.",
+    PHISHING_KEYWORDS: "Mailde acele ettiren veya sizi işlem yapmaya zorlayan ifadeler var.",
+    IP_LINK: "Bağlantı alan adı yerine doğrudan bir IP adresine gidiyor.",
+    URGENCY_LANGUAGE: "Mail sizden hızlı karar vermenizi istiyor.",
+    ACCOUNT_THREAT_LANGUAGE: "Mail, hesap kapanması veya güvenlik tehdidi dili kullanıyor.",
+    EXTORTION_LANGUAGE: "Mail, ödeme yapılmazsa dosyalarınızın şifreleneceğini veya erişiminizin kapanacağını söylüyor.",
+    UNEXPECTED_ATTACHMENT_REQUEST: "Beklenmedik bir ek dosyayı açmanız isteniyor.",
+    PAYMENT_REQUEST_LANGUAGE: "Mail sizi ödeme yapmaya yönlendiriyor.",
+    BANK_CHANGE_LANGUAGE: "Mail içinde IBAN veya banka bilgisi değişikliği var.",
+    INVOICE_PRESSURE_LANGUAGE: "Mail, ödeme veya fatura işlemi için zaman baskısı kuruyor.",
+    SPF_FAIL: "Gönderen sunucu, alan adı adına yetkili görünmüyor.",
+    SPF_SOFTFAIL: "Gönderen sunucu için zayıf bir SPF sonucu görüldü.",
+    DKIM_FAIL: "Mailin imza doğrulaması başarısız oldu; içerik değiştirilmiş olabilir.",
+    DMARC_FAIL: "Alan adı doğrulaması ve hizalaması başarısız görünüyor."
+  };
+
   var state = {
     config: null,
     access: null,
     authToken: readStoredToken(),
-    pendingLabelRow: null,
     pendingSaveScope: null,
     dirtySections: {},
     advancedListsVisible: false,
     resetPasswordVerified: false,
-    historyDateFilter: "all"
+    historyDateFilter: "all",
+    saveButtonTimer: null,
+    saveButtonLocked: false,
+    saveButtonConfirming: false,
+    confirmingDeleteButton: null,
+    deleteConfirmTimer: null,
+    sectionSaveTimers: {}
   };
 
   document.addEventListener("DOMContentLoaded", function () {
+    normalizeStaticChrome();
     bindStaticEvents();
     bindNavigation();
     bootstrapAdmin();
   });
 
+  function normalizeStaticChrome() {
+    var navText = {
+      overviewSection: "Genel bakış",
+      versionSection: "Sürüm",
+      rulesSection: "Kural motoru",
+      listsSection: "Kayıtlar",
+      labelsSection: "Etiketler",
+      securitySection: "Güvenlik"
+    };
+    var navButtons = document.querySelectorAll(".nav-item");
+    var i = 0;
+    for (i = 0; i < navButtons.length; i += 1) {
+      var target = navButtons[i].getAttribute("data-target");
+      if (navText[target]) {
+        navButtons[i].textContent = navText[target];
+      }
+    }
+
+    document.title = "PhishGuard Yönetim Paneli";
+    setText(".sidebar-title", "PhishGuard");
+    setText(".sidebar-subtitle", "Admin Panel");
+    setText(".sidebar-meta-label", "Durum");
+    setText(".eyebrow", "Temel Yapılandırma");
+    setText(".topbar-copy h1", "Sistem Ayarları");
+    setText(".page-intro", "Merkezi güvenlik kurallarını, kayıtları ve görünüm eşlemelerini tek panelden yönetin.");
+    setText("#saveButton", "Tümünü Kaydet");
+  }
+
+  function setText(selector, value) {
+    var element = document.querySelector(selector);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+
   function bindStaticEvents() {
     document.getElementById("saveButton").onclick = function () {
-      requestSaveConfirmation("all");
+      handleGlobalSaveClick();
     };
     document.getElementById("addLabelButton").onclick = addEmptyLabelRow;
     document.getElementById("toggleAdvancedListsButton").onclick = toggleAdvancedLists;
-    document.getElementById("confirmDeleteButton").onclick = confirmLabelRemoval;
-    document.getElementById("cancelDeleteButton").onclick = closeDeleteModal;
     document.getElementById("confirmSaveButton").onclick = confirmSave;
     document.getElementById("cancelSaveButton").onclick = closeSaveModal;
     document.getElementById("closeInfoButton").onclick = closeInfoModal;
@@ -107,7 +172,6 @@
       }
     });
 
-    bindOverlayClose("deleteModalOverlay", closeDeleteModal);
     bindOverlayClose("saveModalOverlay", closeSaveModal);
     bindOverlayClose("infoModalOverlay", closeInfoModal);
     bindOverlayClose("resetModalOverlay", closeResetModal);
@@ -116,6 +180,16 @@
     bindOverlayClose("historyModalOverlay", closeHistoryModal);
 
     bindSectionSaveButtons();
+
+    document.addEventListener("click", function (event) {
+      if (!state.confirmingDeleteButton) {
+        return;
+      }
+      if (state.confirmingDeleteButton.contains(event.target)) {
+        return;
+      }
+      clearDeleteConfirmState();
+    });
   }
 
   function bootstrapAdmin() {
@@ -365,10 +439,89 @@
     var buttons = document.querySelectorAll(".section-save-button");
     var i;
     for (i = 0; i < buttons.length; i += 1) {
+      buttons[i].setAttribute("data-default-label", buttons[i].textContent);
       buttons[i].onclick = function () {
-        requestSaveConfirmation(this.getAttribute("data-section"));
+        handleSectionSaveClick(this, this.getAttribute("data-section"));
       };
     }
+  }
+
+  function handleSectionSaveClick(button, sectionName) {
+    if (!sectionName) {
+      return;
+    }
+
+    if (!state.dirtySections[sectionName]) {
+      showFlash("Bu bölümde kaydedilecek değişiklik yok.", "success");
+      return;
+    }
+
+    var validationMessage = validateScope(sectionName);
+    if (validationMessage) {
+      openInfoModal(validationMessage);
+      return;
+    }
+
+    if (button.classList.contains("is-confirm")) {
+      clearSectionSaveConfirmState(sectionName);
+      saveScope(sectionName);
+      return;
+    }
+
+    activateSectionSaveConfirm(button, sectionName);
+  }
+
+  function activateSectionSaveConfirm(button, sectionName) {
+    clearAllSectionSaveConfirmStates();
+    button.textContent = "Emin misiniz?";
+    button.className = "secondary-button section-save-button is-confirm";
+    state.sectionSaveTimers[sectionName] = window.setTimeout(function () {
+      clearSectionSaveConfirmState(sectionName);
+      updateSaveState();
+    }, 2200);
+  }
+
+  function clearSectionSaveConfirmState(sectionName) {
+    var button = document.querySelector('.section-save-button[data-section="' + sectionName + '"]');
+    if (state.sectionSaveTimers[sectionName]) {
+      window.clearTimeout(state.sectionSaveTimers[sectionName]);
+      delete state.sectionSaveTimers[sectionName];
+    }
+    if (button) {
+      button.className = "secondary-button section-save-button";
+      button.textContent = button.getAttribute("data-default-label") || "Bölümü Kaydet";
+    }
+  }
+
+  function clearAllSectionSaveConfirmStates() {
+    var key;
+    for (key in state.sectionSaveTimers) {
+      if (Object.prototype.hasOwnProperty.call(state.sectionSaveTimers, key)) {
+        clearSectionSaveConfirmState(key);
+      }
+    }
+  }
+
+  function setSectionSaveButtonVisual(sectionName, kind, text, disabled) {
+    var button = document.querySelector('.section-save-button[data-section="' + sectionName + '"]');
+    if (!button) {
+      return;
+    }
+    if (state.sectionSaveTimers[sectionName]) {
+      window.clearTimeout(state.sectionSaveTimers[sectionName]);
+      delete state.sectionSaveTimers[sectionName];
+    }
+    button.className = "secondary-button section-save-button is-" + kind;
+    button.textContent = text;
+    button.disabled = !!disabled;
+  }
+
+  function pulseSectionSaveButton(sectionName, kind, text) {
+    setSectionSaveButtonVisual(sectionName, kind, text, true);
+    state.sectionSaveTimers[sectionName] = window.setTimeout(function () {
+      clearSectionSaveConfirmState(sectionName);
+      updateSaveState();
+    }, 1600);
   }
 
   function loadConfig() {
@@ -401,6 +554,7 @@
     document.getElementById("phishingKeywords").value = toLines(config.phrases.phishing_keywords);
 
     document.getElementById("trustedRelatedDomains").value = toLines(config.domains.trusted_related_domains);
+    document.getElementById("trustedIbans").value = toLines(config.domains.trusted_ibans || []);
     document.getElementById("urgencyPhrases").value = toLines(config.phrases.urgency_phrases);
     document.getElementById("accountThreatPhrases").value = toLines(config.phrases.account_threat_phrases);
     document.getElementById("extortionPhrases").value = toLines(config.phrases.extortion_phrases || []);
@@ -423,7 +577,12 @@
 
     renderRuleWeightCards(displayRuleWeights, config.disabled_rules || []);
     renderDisabledRuleToggles(displayRuleWeights, config.disabled_rules || []);
-    renderLabelRows(config.rule_chip_labels || {}, config.rule_display_meta || {});
+    renderLabelRows(
+      config.rule_chip_labels || {},
+      config.rule_display_meta || {},
+      config.custom_rule_modes || {},
+      config.custom_rule_missing_policies || {}
+    );
     renderCustomPhraseCards(config);
     applyBuiltInDisplayMeta(config.rule_display_meta || {});
     normalizeCustomRuleSection();
@@ -470,9 +629,22 @@
   function saveScope(scope) {
     var payload = collectPayloadForScope(scope);
     payload._audit = buildAuditPayload(scope, payload);
+    if (scope === "all") {
+      clearSaveButtonConfirmState();
+      state.saveButtonLocked = true;
+      setSaveButtonVisual("saving", "Kaydediliyor...", true);
+    } else {
+      clearSectionSaveConfirmState(scope);
+      setSectionSaveButtonVisual(scope, "saving", "Kaydediliyor...", true);
+    }
     requestJson("PUT", "/api/admin/config", payload, function (savedConfig) {
       finalizeSave(scope, payload, savedConfig);
     }, function (error) {
+      if (scope === "all") {
+        pulseSaveButton("error", "Başarısız");
+      } else {
+        pulseSectionSaveButton(scope, "error", "Başarısız");
+      }
       showFlash(readError(error), "error");
       if (error && error.status === 401) {
         clearStoredToken();
@@ -516,14 +688,15 @@
       };
     }
 
-    if (sectionName === "listsSection") {
-      return {
-        domains: {
-          trusted_related_domains: fromLines(document.getElementById("trustedRelatedDomains").value),
-          company_trusted_domains: fromLines(document.getElementById("companyDomains").value),
-          shortener_domains: fromLines(document.getElementById("shortenerDomains").value),
-          suspicious_tlds: fromLines(document.getElementById("suspiciousTlds").value)
-        },
+      if (sectionName === "listsSection") {
+        return {
+          domains: {
+            trusted_related_domains: fromLines(document.getElementById("trustedRelatedDomains").value),
+            company_trusted_domains: fromLines(document.getElementById("companyDomains").value),
+            trusted_ibans: fromLines(document.getElementById("trustedIbans").value),
+            shortener_domains: fromLines(document.getElementById("shortenerDomains").value),
+            suspicious_tlds: fromLines(document.getElementById("suspiciousTlds").value)
+          },
         attachments: {
           suspicious_extensions: fromLines(document.getElementById("suspiciousExtensions").value),
           double_extension_bait_extensions: fromLines(document.getElementById("doubleExtensionBaitExtensions").value)
@@ -542,12 +715,14 @@
       };
     }
 
-    if (sectionName === "labelsSection") {
-      return {
-        rule_chip_labels: collectLabelRows(),
-        rule_display_meta: collectDisplayMetaRows()
-      };
-    }
+      if (sectionName === "labelsSection") {
+        return {
+          rule_chip_labels: collectLabelRows(),
+          rule_display_meta: collectDisplayMetaRows(),
+          custom_rule_modes: collectLabelModes(),
+          custom_rule_missing_policies: collectLabelMissingPolicies()
+        };
+      }
 
     return {};
   }
@@ -634,6 +809,10 @@
     if (message) {
       return message;
     }
+    message = validateListField("trustedIbans", "Güvenli IBAN listesi", "iban");
+    if (message) {
+      return message;
+    }
     message = validateListField("suspiciousTlds", "Şüpheli TLD listesi", "tld");
     if (message) {
       return message;
@@ -677,35 +856,80 @@
     renderKeyValueInputs("ruleWeightsGrid", entries, "weight-", "rulesSection", disabledRules || []);
   }
 
-  function renderLabelRows(entries, displayMeta) {
+  function renderLabelRows(entries, displayMeta, modes, missingPolicies) {
     var container = document.getElementById("chipLabelsGrid");
     clearChildren(container);
     displayMeta = displayMeta || {};
+    modes = modes || {};
+    missingPolicies = missingPolicies || {};
 
     var keys = Object.keys(entries).sort();
     var i;
     for (i = 0; i < keys.length; i += 1) {
-      appendLabelRow(container, keys[i], entries[keys[i]], displayMeta[keys[i]] || {});
+      appendLabelRow(
+        container,
+        keys[i],
+        entries[keys[i]],
+        displayMeta[keys[i]] || {},
+        modes[keys[i]] || "signal",
+        !!missingPolicies[keys[i]]
+      );
     }
 
     if (keys.length === 0) {
-      appendLabelRow(container, "", "", {});
+      appendLabelRow(container, "", "", {}, "signal", false);
     }
   }
 
-  function appendLabelRow(container, key, value, meta) {
+  function handleGlobalSaveClick() {
+    if (state.saveButtonLocked) {
+      return;
+    }
+
+    if (!hasDirtySections()) {
+      showFlash("Kaydedilecek değişiklik yok.", "success");
+      return;
+    }
+
+    var validationMessage = validateScope("all");
+    if (validationMessage) {
+      openInfoModal(validationMessage);
+      return;
+    }
+
+    if (state.saveButtonConfirming) {
+      clearSaveButtonConfirmState();
+      saveScope("all");
+      return;
+    }
+
+    state.saveButtonConfirming = true;
+    window.clearTimeout(state.saveButtonTimer);
+    setSaveButtonVisual("confirm", "Emin misiniz?", false);
+    state.saveButtonTimer = window.setTimeout(function () {
+      clearSaveButtonConfirmState();
+      syncGlobalSaveButton();
+    }, 2200);
+  }
+
+  function appendLabelRow(container, key, value, meta, mode, missingPolicyEnabled) {
     var row = document.createElement("div");
+    var grid = document.createElement("div");
     var actionWrap = document.createElement("div");
     var removeButton = document.createElement("button");
     var icon = document.createElement("span");
 
     row.className = "label-row";
+    grid.className = "label-row-grid";
     meta = meta || {};
 
-    row.appendChild(createField("Kural Anahtar\u0131", "label-key-input", key || "", "ORNEK_ETIKET", "labelsSection"));
-    row.appendChild(createField("Etiket", "label-value-input", value || "", "Etiket Ad\u0131", "labelsSection"));
-    row.appendChild(createField("Ba\u015fl\u0131k", "label-title-input", meta.title || "", "Kart Ba\u015fl\u0131\u011f\u0131", "labelsSection"));
-    row.appendChild(createField("A\u00e7\u0131klama", "label-description-input", meta.description || "", "K\u0131sa a\u00e7\u0131klama", "labelsSection"));
+    grid.appendChild(createField("Kural Anahtar\u0131", "label-key-input", key || "", "ORNEK_ETIKET", "labelsSection"));
+    grid.appendChild(createField("Etiket", "label-value-input", value || "", "Etiket Ad\u0131", "labelsSection"));
+    grid.appendChild(createField("Ba\u015fl\u0131k", "label-title-input", meta.title || "", "Kart Ba\u015fl\u0131\u011f\u0131", "labelsSection"));
+    grid.appendChild(createField("A\u00e7\u0131klama", "label-description-input", meta.description || "", "K\u0131sa a\u00e7\u0131klama", "labelsSection"));
+    grid.appendChild(createField("Panel A\u00e7\u0131klamas\u0131", "label-panel-description-input", getPanelDescriptionValue(key, meta), "Yan panelde g\u00f6r\u00fcnecek a\u00e7\u0131klama", "labelsSection", "is-wide"));
+    grid.appendChild(createModeSwitchField(mode || "signal", !!missingPolicyEnabled, "labelsSection"));
+    row.appendChild(grid);
 
     actionWrap.className = "label-row-action";
     removeButton.type = "button";
@@ -715,8 +939,11 @@
     icon.className = "danger-icon-glyph";
     icon.appendChild(document.createTextNode("\u00d7"));
     removeButton.appendChild(icon);
-    removeButton.onclick = function () {
-      openDeleteModal(row);
+    removeButton.appendChild(createDeleteButtonText("Kald\u0131r", "danger-icon-label"));
+    removeButton.appendChild(createDeleteButtonText("Emin misiniz?", "danger-icon-confirm"));
+    removeButton.onclick = function (event) {
+      event.stopPropagation();
+      handleInlineLabelRemoval(row, removeButton);
     };
     actionWrap.appendChild(removeButton);
 
@@ -724,9 +951,12 @@
     container.appendChild(row);
   }
 
-  function createField(labelText, inputClass, value, placeholder, sectionName) {
+  function createField(labelText, inputClass, value, placeholder, sectionName, extraClass) {
     var field = document.createElement("div");
     field.className = "field";
+    if (extraClass) {
+      field.className += " " + extraClass;
+    }
 
     var label = document.createElement("label");
     label.appendChild(document.createTextNode(labelText));
@@ -744,28 +974,177 @@
     return field;
   }
 
+  function createDeleteButtonText(text, className) {
+    var span = document.createElement("span");
+    span.className = className;
+    span.appendChild(document.createTextNode(text));
+    return span;
+  }
+
+  function createModeSwitchField(mode, missingPolicyEnabled, sectionName) {
+    var field = document.createElement("div");
+    var label = document.createElement("label");
+    var switchWrap = document.createElement("label");
+    var input = document.createElement("input");
+    var slider = document.createElement("span");
+    var caption = document.createElement("span");
+    var missingWrap = document.createElement("div");
+    var missingLabel = document.createElement("span");
+    var missingSwitch = document.createElement("label");
+    var missingInput = document.createElement("input");
+    var missingSlider = document.createElement("span");
+    var missingCaption = document.createElement("span");
+
+    field.className = "field mode-switch-field is-wide";
+
+    label.appendChild(document.createTextNode("Kural Türü"));
+
+    switchWrap.className = "mode-switch";
+    input.type = "checkbox";
+    input.className = "label-mode-input";
+    input.checked = mode === "privileged";
+    input.oninput = createSectionDirtyHandler(sectionName);
+    input.onchange = function () {
+      createSectionDirtyHandler(sectionName)();
+      updateModeSwitchCaption(field, input.checked);
+    };
+
+    slider.className = "mode-switch-slider";
+    switchWrap.appendChild(input);
+    switchWrap.appendChild(slider);
+
+    caption.className = "mode-switch-caption";
+    field.appendChild(label);
+    field.appendChild(switchWrap);
+    field.appendChild(caption);
+    missingWrap.className = "field mode-subswitch" + (input.checked ? "" : " hidden");
+    missingLabel.className = "mode-subswitch-label";
+    missingLabel.appendChild(document.createTextNode("Mailde geçmiyorsa riski artır"));
+    missingSwitch.className = "mode-switch mode-switch-secondary";
+    missingInput.type = "checkbox";
+    missingInput.className = "label-safe-missing-input";
+    missingInput.checked = !!missingPolicyEnabled;
+    missingInput.oninput = createSectionDirtyHandler(sectionName);
+    missingInput.onchange = function () {
+      createSectionDirtyHandler(sectionName)();
+      updateMissingSwitchCaption(missingWrap, missingInput.checked);
+    };
+    missingSlider.className = "mode-switch-slider";
+    missingSwitch.appendChild(missingInput);
+    missingSwitch.appendChild(missingSlider);
+    missingCaption.className = "mode-switch-caption";
+    missingWrap.appendChild(missingLabel);
+    missingWrap.appendChild(missingSwitch);
+    missingWrap.appendChild(missingCaption);
+    field.appendChild(missingWrap);
+    updateModeSwitchCaption(field, input.checked);
+    updateMissingSwitchCaption(missingWrap, missingInput.checked);
+    input.onchange = function () {
+      createSectionDirtyHandler(sectionName)();
+      updateModeSwitchCaption(field, input.checked);
+      missingWrap.className = input.checked ? "field mode-subswitch" : "field mode-subswitch hidden";
+    };
+    return field;
+  }
+
+  function updateModeSwitchCaption(field, isPrivileged) {
+    var caption = field.querySelector(".mode-switch-caption");
+    if (!caption) {
+      return;
+    }
+    caption.textContent = isPrivileged ? "Güvenli" : "Şüpheli";
+    caption.className = isPrivileged ? "mode-switch-caption is-safe" : "mode-switch-caption is-signal";
+  }
+
+  function updateMissingSwitchCaption(field, isEnabled) {
+    var caption = field.querySelector(".mode-switch-caption");
+    if (!caption) {
+      return;
+    }
+    caption.textContent = isEnabled ? "Yükseltsin" : "Yükseltmesin";
+    caption.className = isEnabled ? "mode-switch-caption is-signal" : "mode-switch-caption is-safe";
+  }
+
+  function createSelectField(labelText, inputClass, value, sectionName, options) {
+    var field = document.createElement("div");
+    field.className = "field";
+
+    var label = document.createElement("label");
+    label.appendChild(document.createTextNode(labelText));
+
+    var select = document.createElement("select");
+    select.className = inputClass;
+    select.oninput = createSectionDirtyHandler(sectionName);
+    select.onchange = createSectionDirtyHandler(sectionName);
+
+    var i;
+    var option;
+    for (i = 0; i < options.length; i += 1) {
+      option = document.createElement("option");
+      option.value = options[i].value;
+      option.textContent = options[i].label;
+      if (options[i].value === value) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    }
+
+    field.appendChild(label);
+    field.appendChild(select);
+    return field;
+  }
+
+  function getPanelDescriptionValue(ruleId, meta) {
+    var value = meta && meta.panel_description ? String(meta.panel_description).trim() : "";
+
+    if (value) {
+      return value;
+    }
+
+    return BUILTIN_PANEL_DESCRIPTION_FALLBACKS[ruleId] || "";
+  }
+
   function addEmptyLabelRow() {
-    appendLabelRow(document.getElementById("chipLabelsGrid"), "", "", {});
+    appendLabelRow(document.getElementById("chipLabelsGrid"), "", "", {}, "signal", false);
     markDirty("labelsSection");
   }
 
-  function openDeleteModal(row) {
-    state.pendingLabelRow = row;
-    document.getElementById("deleteModalOverlay").className = "modal-overlay";
-  }
-
-  function closeDeleteModal() {
-    state.pendingLabelRow = null;
-    document.getElementById("deleteModalOverlay").className = "modal-overlay hidden";
-  }
-
-  function confirmLabelRemoval() {
-    if (state.pendingLabelRow && state.pendingLabelRow.parentNode) {
-      state.pendingLabelRow.parentNode.removeChild(state.pendingLabelRow);
-      ensureAtLeastOneLabelRow();
-      markDirty("labelsSection");
+  function handleInlineLabelRemoval(row, button) {
+    if (state.confirmingDeleteButton === button && button.classList.contains("is-confirming")) {
+      clearDeleteConfirmState();
+      if (row && row.parentNode) {
+        row.parentNode.removeChild(row);
+        ensureAtLeastOneLabelRow();
+        markDirty("labelsSection");
+      }
+      return;
     }
-    closeDeleteModal();
+
+    activateDeleteConfirm(button);
+  }
+
+  function activateDeleteConfirm(button) {
+    clearDeleteConfirmState();
+    state.confirmingDeleteButton = button;
+    button.classList.add("is-confirming");
+    button.setAttribute("aria-label", "Silme onayı");
+    window.clearTimeout(state.deleteConfirmTimer);
+    state.deleteConfirmTimer = window.setTimeout(function () {
+      clearDeleteConfirmState();
+    }, 2400);
+  }
+
+  function clearDeleteConfirmState() {
+    window.clearTimeout(state.deleteConfirmTimer);
+    state.deleteConfirmTimer = null;
+    if (state.confirmingDeleteButton) {
+      state.confirmingDeleteButton.classList.remove("is-confirming");
+      state.confirmingDeleteButton.setAttribute("aria-label", "Etiketi kaldır");
+      if (document.activeElement === state.confirmingDeleteButton) {
+        state.confirmingDeleteButton.blur();
+      }
+    }
+    state.confirmingDeleteButton = null;
   }
 
   function openInfoModal(message) {
@@ -780,7 +1159,7 @@
   function ensureAtLeastOneLabelRow() {
     var container = document.getElementById("chipLabelsGrid");
     if (!container.children.length) {
-      appendLabelRow(container, "", "", {});
+      appendLabelRow(container, "", "", {}, "signal", false);
     }
   }
 
@@ -808,11 +1187,46 @@
       var key = rows[i].querySelector(".label-key-input").value.trim();
       var title = rows[i].querySelector(".label-title-input").value.trim();
       var description = rows[i].querySelector(".label-description-input").value.trim();
+      var panelDescription = rows[i].querySelector(".label-panel-description-input").value.trim();
       if (key) {
         values[key] = {
           title: title,
-          description: description
+          description: description,
+          panel_description: panelDescription
         };
+      }
+    }
+
+    return values;
+  }
+
+  function collectLabelModes() {
+    var rows = document.querySelectorAll("#chipLabelsGrid .label-row");
+    var values = {};
+    var i;
+
+    for (i = 0; i < rows.length; i += 1) {
+      var key = rows[i].querySelector(".label-key-input").value.trim();
+      var mode = rows[i].querySelector(".label-mode-input").checked ? "privileged" : "signal";
+      if (key && BUILTIN_RULE_KEYS.indexOf(key) < 0) {
+        values[key] = mode === "privileged" ? "privileged" : "signal";
+      }
+    }
+
+    return values;
+  }
+
+  function collectLabelMissingPolicies() {
+    var rows = document.querySelectorAll("#chipLabelsGrid .label-row");
+    var values = {};
+    var i;
+
+    for (i = 0; i < rows.length; i += 1) {
+      var key = rows[i].querySelector(".label-key-input").value.trim();
+      var isPrivileged = rows[i].querySelector(".label-mode-input").checked;
+      var missingInput = rows[i].querySelector(".label-safe-missing-input");
+      if (key && isPrivileged && missingInput) {
+        values[key] = !!missingInput.checked;
       }
     }
 
@@ -1464,6 +1878,9 @@
     if (kind === "domain") {
       return /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/i.test(value);
     }
+    if (kind === "iban") {
+      return /^TR\d{2}(?:\s?\d{4}){5}\s?\d{2}$/i.test(value);
+    }
     if (kind === "tld") {
       return /^\.[a-z0-9-]{2,}$/i.test(value);
     }
@@ -1570,7 +1987,7 @@
 
   function bindDirtyTracking() {
     bindSectionInputs("#appVersion, #versionNote, #lowRiskMax, #mediumRiskMax", "versionSection");
-    bindSectionInputs("#companyDomains, #shortenerDomains, #suspiciousTlds, #phishingKeywords, #trustedRelatedDomains, #urgencyPhrases, #accountThreatPhrases, #extortionPhrases, #attachmentRequestPhrases, #paymentRequestPhrases, #bankChangePhrases, #invoicePressurePhrases, #suspiciousExtensions, #doubleExtensionBaitExtensions", "listsSection");
+    bindSectionInputs("#companyDomains, #shortenerDomains, #suspiciousTlds, #phishingKeywords, #trustedRelatedDomains, #trustedIbans, #urgencyPhrases, #accountThreatPhrases, #extortionPhrases, #attachmentRequestPhrases, #paymentRequestPhrases, #bankChangePhrases, #invoicePressurePhrases, #suspiciousExtensions, #doubleExtensionBaitExtensions", "listsSection");
   }
 
   function bindSectionInputs(selector, sectionName) {
@@ -1629,8 +2046,56 @@
     var saveButtons = document.querySelectorAll(".section-save-button");
     for (i = 0; i < saveButtons.length; i += 1) {
       var targetSection = saveButtons[i].getAttribute("data-section");
+      if (
+        saveButtons[i].classList.contains("is-confirm")
+        || saveButtons[i].classList.contains("is-saving")
+        || saveButtons[i].classList.contains("is-success")
+        || saveButtons[i].classList.contains("is-error")
+      ) {
+        continue;
+      }
       saveButtons[i].disabled = !state.dirtySections[targetSection];
     }
+
+    syncGlobalSaveButton();
+  }
+
+  function syncGlobalSaveButton() {
+    var saveButton = document.getElementById("saveButton");
+    if (!saveButton || state.saveButtonLocked || state.saveButtonConfirming) {
+      return;
+    }
+
+    saveButton.disabled = !hasDirtySections();
+    saveButton.textContent = "Tümünü Kaydet";
+    saveButton.className = "primary-button";
+  }
+
+  function setSaveButtonVisual(kind, text, disabled) {
+    var saveButton = document.getElementById("saveButton");
+    if (!saveButton) {
+      return;
+    }
+
+    saveButton.disabled = !!disabled;
+    saveButton.textContent = text;
+    saveButton.className = "primary-button is-" + kind;
+  }
+
+  function clearSaveButtonConfirmState() {
+    state.saveButtonConfirming = false;
+    window.clearTimeout(state.saveButtonTimer);
+  }
+
+  function pulseSaveButton(kind, text) {
+    clearSaveButtonConfirmState();
+    state.saveButtonLocked = true;
+    window.clearTimeout(state.saveButtonTimer);
+    setSaveButtonVisual(kind, text, true);
+    state.saveButtonTimer = window.setTimeout(function () {
+      state.saveButtonLocked = false;
+      syncGlobalSaveButton();
+    }, 1600);
   }
 
   function showFlash(text, type) {
@@ -1655,12 +2120,19 @@
       buttons[i].onclick = function () {
         setActiveNav(this);
         var targetId = this.getAttribute("data-target");
+        if (targetId === "overviewSection") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
         var target = document.getElementById(targetId);
         if (target && target.scrollIntoView) {
           target.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       };
     }
+
+    window.addEventListener("scroll", syncActiveNavToScroll, { passive: true });
+    syncActiveNavToScroll();
   }
 
   function setActiveNav(activeButton) {
@@ -1670,6 +2142,32 @@
       buttons[i].className = "nav-item";
     }
     activeButton.className = "nav-item is-active";
+  }
+
+  function syncActiveNavToScroll() {
+    var buttons = document.querySelectorAll(".nav-item");
+    var activeButton = null;
+    var i;
+
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 40) {
+      activeButton = buttons.length ? buttons[buttons.length - 1] : null;
+    } else {
+      for (i = 0; i < buttons.length; i += 1) {
+        var targetId = buttons[i].getAttribute("data-target");
+        var target = document.getElementById(targetId);
+        if (target && target.getBoundingClientRect().top <= 180) {
+          activeButton = buttons[i];
+        }
+      }
+    }
+
+    if (!activeButton && buttons.length) {
+      activeButton = buttons[0];
+    }
+
+    if (activeButton) {
+      setActiveNav(activeButton);
+    }
   }
 
   function mergeInto(target, source) {
@@ -1743,6 +2241,11 @@
       clearDirtyScope(scope);
       renderConfig(savedConfig);
       updateSaveState();
+      if (scope === "all") {
+        pulseSaveButton("success", "Başarılı");
+      } else {
+        pulseSectionSaveButton(scope, "success", "Başarılı");
+      }
       showFlash(scope === "all" ? "Tüm değişiklikler kaydedildi." : SECTIONS[scope] + " kaydedildi.", "success");
     };
 

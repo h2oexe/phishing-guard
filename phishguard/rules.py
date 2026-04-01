@@ -24,6 +24,10 @@ def evaluate_rules(features: MailFeatures) -> list[RuleMatch]:
         _payment_request_language(features, runtime_config),
         _bank_change_language(features, runtime_config),
         _invoice_pressure_language(features, runtime_config),
+        _spf_fail(features, runtime_config),
+        _spf_softfail(features, runtime_config),
+        _dkim_fail(features, runtime_config),
+        _dmarc_fail(features, runtime_config),
     ]
     rules.extend(_custom_phrase_rules(features, runtime_config))
     return [rule for rule in rules if rule.matched and rule.rule_id not in disabled_rules]
@@ -199,13 +203,18 @@ def _payment_request_language(features: MailFeatures, runtime_config: dict) -> R
 
 
 def _bank_change_language(features: MailFeatures, runtime_config: dict) -> RuleMatch:
+    only_trusted_ibans = bool(features.detected_ibans) and len(features.detected_ibans) == len(features.trusted_iban_hits)
     return RuleMatch(
         rule_id="BANK_CHANGE_LANGUAGE",
-        matched=bool(features.bank_change_hits),
+        matched=bool(features.bank_change_hits) and not only_trusted_ibans,
         weight=_rule_weight(runtime_config, "BANK_CHANGE_LANGUAGE"),
         confidence="medium",
         reason="IBAN veya banka bilgisi değişikliği bildirimi bulundu",
-        details={"phrases": features.bank_change_hits},
+        details={
+            "phrases": features.bank_change_hits,
+            "detected_ibans": features.detected_ibans,
+            "trusted_iban_hits": features.trusted_iban_hits,
+        },
     )
 
 
@@ -222,9 +231,12 @@ def _invoice_pressure_language(features: MailFeatures, runtime_config: dict) -> 
 
 def _custom_phrase_rules(features: MailFeatures, runtime_config: dict) -> list[RuleMatch]:
     labels = runtime_config.get("rule_chip_labels", {})
+    custom_rule_modes = runtime_config.get("custom_rule_modes", {})
     matches: list[RuleMatch] = []
 
     for rule_id in sorted(features.custom_phrase_hits):
+        if custom_rule_modes.get(rule_id) == "privileged":
+            continue
         label = str(labels.get(rule_id, rule_id)).strip() or rule_id
         matches.append(
             RuleMatch(
@@ -237,7 +249,66 @@ def _custom_phrase_rules(features: MailFeatures, runtime_config: dict) -> list[R
             )
         )
 
+    for rule_id in sorted(features.custom_privileged_missing):
+        if custom_rule_modes.get(rule_id) != "privileged":
+            continue
+        label = str(labels.get(rule_id, rule_id)).strip() or rule_id
+        matches.append(
+            RuleMatch(
+                rule_id=rule_id,
+                matched=True,
+                weight=_rule_weight(runtime_config, rule_id),
+                confidence="medium",
+                reason=f"{label} için güvenli ifade bulunamadı",
+                details={"missing_phrases": features.custom_privileged_missing[rule_id]},
+            )
+        )
+
     return matches
+
+
+def _spf_fail(features: MailFeatures, runtime_config: dict) -> RuleMatch:
+    return RuleMatch(
+        rule_id="SPF_FAIL",
+        matched=features.spf_result == "fail",
+        weight=_rule_weight(runtime_config, "SPF_FAIL"),
+        confidence="medium",
+        reason="SPF doğrulaması başarısız oldu",
+        details={"spf_result": features.spf_result},
+    )
+
+
+def _spf_softfail(features: MailFeatures, runtime_config: dict) -> RuleMatch:
+    return RuleMatch(
+        rule_id="SPF_SOFTFAIL",
+        matched=features.spf_result == "softfail",
+        weight=_rule_weight(runtime_config, "SPF_SOFTFAIL"),
+        confidence="low",
+        reason="SPF doğrulaması softfail sonucu verdi",
+        details={"spf_result": features.spf_result},
+    )
+
+
+def _dkim_fail(features: MailFeatures, runtime_config: dict) -> RuleMatch:
+    return RuleMatch(
+        rule_id="DKIM_FAIL",
+        matched=features.dkim_result == "fail",
+        weight=_rule_weight(runtime_config, "DKIM_FAIL"),
+        confidence="high",
+        reason="DKIM imza doğrulaması başarısız oldu",
+        details={"dkim_result": features.dkim_result},
+    )
+
+
+def _dmarc_fail(features: MailFeatures, runtime_config: dict) -> RuleMatch:
+    return RuleMatch(
+        rule_id="DMARC_FAIL",
+        matched=features.dmarc_result == "fail",
+        weight=_rule_weight(runtime_config, "DMARC_FAIL"),
+        confidence="high",
+        reason="DMARC doğrulaması başarısız oldu",
+        details={"dmarc_result": features.dmarc_result},
+    )
 
 
 def _normalize_domain(domain: str) -> str:

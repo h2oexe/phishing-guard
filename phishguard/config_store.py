@@ -35,62 +35,97 @@ BUILTIN_RULE_DISPLAY_META: dict[str, dict[str, str]] = {
     "DOMAIN_LINK_MISMATCH": {
         "title": "Alan Adı Uyuşmazlığı",
         "description": "Bağlantı adresi ile mailin geldiği alan adı arasındaki farkı açıklar.",
+        "panel_description": "Bağlantı adresi, mailin geldiği alan adıyla uyuşmuyor.",
     },
     "DISPLAY_TARGET_MISMATCH": {
         "title": "Sahte Hedef Uyarısı",
         "description": "Görünen bağlantı ile açılan gerçek adres arasındaki farkı açıklar.",
+        "panel_description": "Görünen bağlantı ile açılan gerçek adres aynı görünmüyor.",
     },
     "SUSPICIOUS_TLD": {
         "title": "Şüpheli Uzantı Uyarısı",
         "description": "Riskli alan uzantıları içeren bağlantıları işaretler.",
+        "panel_description": "Bağlantı, riskli alan adı uzantısı kullanıyor olabilir.",
     },
     "SHORTENER_LINK": {
         "title": "Kısa Bağlantı Uyarısı",
         "description": "Kısaltılmış bağlantı servislerinden gelen linkleri işaretler.",
+        "panel_description": "Bağlantı kısa link servisinden geliyor; gerçek adres gizlenmiş olabilir.",
     },
     "SUSPICIOUS_ATTACHMENT": {
         "title": "Şüpheli Ek Uyarısı",
         "description": "Yüksek riskli dosya uzantılarına sahip ekleri işaretler.",
+        "panel_description": "Ek dosya beklenmedik veya riskli bir uzantı taşıyor olabilir.",
     },
     "DOUBLE_EXTENSION": {
         "title": "Çift Uzantı Uyarısı",
         "description": "Dosya adında gizlenmiş uzantı kullanımı ihtimalini açıklar.",
+        "panel_description": "Ek dosya güvenli gibi görünse de gerçek uzantısı farklı olabilir.",
     },
     "PHISHING_KEYWORDS": {
         "title": "Phishing Anahtar Kelimeleri",
         "description": "Metin tabanlı sinyalleri etkiler.",
+        "panel_description": "Mailde acele ettiren veya sizi işlem yapmaya zorlayan ifadeler var.",
     },
     "IP_LINK": {
         "title": "IP Bağlantısı Uyarısı",
         "description": "Alan adı yerine doğrudan IP adresine giden bağlantıları işaretler.",
+        "panel_description": "Bağlantı alan adı yerine doğrudan bir IP adresine gidiyor.",
     },
     "URGENCY_LANGUAGE": {
         "title": "Aciliyet İfadeleri",
         "description": "Zaman baskısı oluşturan metinleri yönetir.",
+        "panel_description": "Mail sizden hızlı karar vermenizi istiyor.",
     },
     "ACCOUNT_THREAT_LANGUAGE": {
         "title": "Hesap Tehdidi İfadeleri",
         "description": "Hesap kapanması veya askıya alma söylemlerini yönetir.",
+        "panel_description": "Mail, hesap kapanması veya güvenlik tehdidi dili kullanıyor.",
     },
     "EXTORTION_LANGUAGE": {
         "title": "Şantaj ve Şifreleme İfadeleri",
         "description": "Dosya şifreleme, veri sızdırma veya erişim kaybı tehdidi içeren metinleri yönetir.",
+        "panel_description": "Mail, ödeme yapılmazsa dosyalarınızın şifreleneceğini veya erişiminizin kapanacağını söylüyor.",
     },
     "UNEXPECTED_ATTACHMENT_REQUEST": {
         "title": "Ek Açma İfadeleri",
         "description": "Ek dosya açmaya yönlendiren cümleleri tutar.",
+        "panel_description": "Beklenmedik bir ek dosyayı açmanız isteniyor.",
     },
     "PAYMENT_REQUEST_LANGUAGE": {
         "title": "Ödeme Talebi İfadeleri",
         "description": "Ödeme ve dekont çağrılarını yönetir.",
+        "panel_description": "Mail sizi ödeme yapmaya yönlendiriyor.",
     },
     "BANK_CHANGE_LANGUAGE": {
         "title": "Banka Değişikliği İfadeleri",
         "description": "IBAN veya banka hesabı değişikliği sinyallerini yönetir.",
+        "panel_description": "Mail içinde IBAN veya banka bilgisi değişikliği var.",
     },
     "INVOICE_PRESSURE_LANGUAGE": {
         "title": "Fatura Baskısı İfadeleri",
         "description": "Süre baskısı ve fatura takibi söylemlerini yönetir.",
+        "panel_description": "Mail, ödeme veya fatura işlemi için zaman baskısı kuruyor.",
+    },
+    "SPF_FAIL": {
+        "title": "SPF Doğrulama Hatası",
+        "description": "Gönderen sunucunun alan adı adına yetkili görünmediği durumları işaretler.",
+        "panel_description": "Gönderen sunucu, alan adı adına yetkili görünmüyor.",
+    },
+    "SPF_SOFTFAIL": {
+        "title": "SPF Softfail Uyarısı",
+        "description": "Gönderen sunucu için zayıf veya kararsız SPF sonucu görüldüğünü gösterir.",
+        "panel_description": "Gönderen sunucu için zayıf bir SPF sonucu görüldü.",
+    },
+    "DKIM_FAIL": {
+        "title": "DKIM İmza Hatası",
+        "description": "Mail imzasının doğrulanamadığı veya içerik bütünlüğünün bozulduğu durumları işaretler.",
+        "panel_description": "Mailin imza doğrulaması başarısız oldu; içerik değiştirilmiş olabilir.",
+    },
+    "DMARC_FAIL": {
+        "title": "DMARC Doğrulama Hatası",
+        "description": "Alan adı hizalaması ve kimlik doğrulaması başarısız olduğunda uyarı verir.",
+        "panel_description": "Alan adı doğrulaması ve hizalaması başarısız görünüyor.",
     },
 }
 
@@ -113,6 +148,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "domains": {
         "trusted_related_domains": sorted(TRUSTED_RELATED_DOMAINS),
         "company_trusted_domains": sorted(COMPANY_TRUSTED_DOMAINS),
+        "trusted_ibans": [],
         "shortener_domains": sorted(SHORTENER_DOMAINS),
         "suspicious_tlds": sorted(SUSPICIOUS_TLDS),
     },
@@ -146,9 +182,15 @@ DEFAULT_CONFIG: dict[str, Any] = {
         "UNEXPECTED_ATTACHMENT_REQUEST": "Ek A\u00e7ma Talebi",
         "PAYMENT_REQUEST_LANGUAGE": "\u00d6deme Talebi",
         "BANK_CHANGE_LANGUAGE": "IBAN De\u011fi\u015fikli\u011fi",
-        "INVOICE_PRESSURE_LANGUAGE": "Fatura Bask\u0131s\u0131"
+        "INVOICE_PRESSURE_LANGUAGE": "Fatura Bask\u0131s\u0131",
+        "SPF_FAIL": "SPF Hatası",
+        "SPF_SOFTFAIL": "SPF Softfail",
+        "DKIM_FAIL": "DKIM Hatası",
+        "DMARC_FAIL": "DMARC Hatası"
     },
     "rule_display_meta": deepcopy(BUILTIN_RULE_DISPLAY_META),
+    "custom_rule_modes": {},
+    "custom_rule_missing_policies": {},
     "admin_access": {
         "password_enabled": False,
         "password_hint": "",
@@ -218,6 +260,7 @@ def get_public_meta() -> dict[str, Any]:
         "version_note": config.get("version_note", ""),
         "updated_at": config["updated_at"],
         "rule_chip_labels": config.get("rule_chip_labels", {}),
+        "rule_display_meta": config.get("rule_display_meta", {}),
         "disabled_rules": config.get("disabled_rules", []),
     }
 
@@ -298,6 +341,8 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     rule_labels = config.setdefault("rule_chip_labels", {})
     rule_display_meta = config.setdefault("rule_display_meta", {})
     rule_weights = config.setdefault("rule_weights", {})
+    custom_rule_modes = config.setdefault("custom_rule_modes", {})
+    custom_rule_missing_policies = config.setdefault("custom_rule_missing_policies", {})
     disabled_rules = config.setdefault("disabled_rules", [])
     phrases = config.setdefault("phrases", {})
     custom_rule_phrases = phrases.setdefault("custom_rule_phrases", {})
@@ -310,18 +355,20 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
             meta["title"] = default_meta["title"]
         if not str(meta.get("description", "")).strip():
             meta["description"] = default_meta["description"]
+        if not str(meta.get("panel_description", "")).strip():
+            meta["panel_description"] = default_meta["panel_description"]
 
     for rule_id in custom_rule_ids:
         rule_weights.setdefault(rule_id, 0)
+        custom_rule_modes[rule_id] = "privileged" if custom_rule_modes.get(rule_id) == "privileged" else "signal"
+        custom_rule_missing_policies[rule_id] = bool(custom_rule_missing_policies.get(rule_id, False))
         value = custom_rule_phrases.get(rule_id, [])
         custom_rule_phrases[rule_id] = value if isinstance(value, list) else []
-        rule_display_meta.setdefault(
-            rule_id,
-            {
-                "title": str(rule_labels.get(rule_id, rule_id)),
-                "description": "",
-            },
-        )
+        meta = rule_display_meta.setdefault(rule_id, {})
+        if not str(meta.get("title", "")).strip():
+            meta["title"] = str(rule_labels.get(rule_id, rule_id))
+        meta.setdefault("description", "")
+        meta.setdefault("panel_description", "")
 
     for rule_id in list(rule_weights):
         if rule_id not in BUILTIN_RULE_IDS and rule_id not in custom_rule_ids:
@@ -334,6 +381,14 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     for rule_id in list(custom_rule_phrases):
         if rule_id not in custom_rule_ids:
             custom_rule_phrases.pop(rule_id, None)
+
+    for rule_id in list(custom_rule_modes):
+        if rule_id not in custom_rule_ids:
+            custom_rule_modes.pop(rule_id, None)
+
+    for rule_id in list(custom_rule_missing_policies):
+        if rule_id not in custom_rule_ids:
+            custom_rule_missing_policies.pop(rule_id, None)
 
     config["disabled_rules"] = [
         rule_id for rule_id in disabled_rules if rule_id in BUILTIN_RULE_IDS or rule_id in custom_rule_ids

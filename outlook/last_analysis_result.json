@@ -1,37 +1,28 @@
 {
-  "score": 15,
+  "score": 6,
   "level": "Düşük Risk",
-  "summary": "Düşük seviyede işaretler var, yine de temel kontrolleri yapın.",
+  "summary": "Şimdilik belirgin bir tehdit görünmüyor.",
   "matched_rules": [
-    "PHISHING_KEYWORDS",
-    "URGENCY_LANGUAGE"
+    "SPF_SOFTFAIL"
   ],
   "reasons": [
-    "Şüpheli ifadeler tespit edildi",
-    "Zaman baskısı oluşturan ifadeler bulundu"
+    "SPF doğrulaması softfail sonucu verdi"
   ],
   "details": {
-    "sender_domain": "sasa.com.tr",
+    "sender_domain": "gmail.com",
     "link_domains": [],
-    "raw_score": 23,
-    "normalized_score": 15,
-    "normalization_base": 151,
+    "raw_score": 10,
+    "normalized_score": 6,
+    "normalization_base": 161,
     "confidence_counts": {
       "low": 1,
-      "medium": 1,
+      "medium": 0,
       "high": 0
     },
-    "intensity": "düşük",
+    "intensity": "çok düşük",
     "rule_details": {
-      "PHISHING_KEYWORDS": {
-        "keywords": [
-          "acil"
-        ]
-      },
-      "URGENCY_LANGUAGE": {
-        "phrases": [
-          "acil"
-        ]
+      "SPF_SOFTFAIL": {
+        "spf_result": "softfail"
       }
     }
   }

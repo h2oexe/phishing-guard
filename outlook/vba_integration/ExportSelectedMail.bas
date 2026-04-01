@@ -103,6 +103,9 @@ Private Function BuildMailJson(ByVal mailItem As Outlook.MailItem) As String
     Dim senderDomain As String
     senderDomain = GetDomainFromEmail(senderEmail)
 
+    Dim transportHeaders As String
+    transportHeaders = GetTransportHeaders(mailItem)
+
     Dim attachmentJson As String
     attachmentJson = BuildAttachmentsJson(mailItem)
 
@@ -114,10 +117,30 @@ Private Function BuildMailJson(ByVal mailItem As Outlook.MailItem) As String
     payload = payload & vbCrLf & "  ""sender_domain"": """ & JsonEscape(senderDomain) & ""","
     payload = payload & vbCrLf & "  ""body_text"": """ & JsonEscape(mailItem.Body) & ""","
     payload = payload & vbCrLf & "  ""body_html"": """ & JsonEscape(mailItem.HTMLBody) & ""","
+    payload = payload & vbCrLf & "  ""transport_headers"": """ & JsonEscape(transportHeaders) & ""","
     payload = payload & vbCrLf & "  ""attachments"": " & attachmentJson
     payload = payload & vbCrLf & "}"
 
     BuildMailJson = payload
+End Function
+
+Private Function GetTransportHeaders(ByVal mailItem As Outlook.MailItem) As String
+    Const PR_TRANSPORT_MESSAGE_HEADERS_UNICODE As String = "http://schemas.microsoft.com/mapi/proptag/0x007D001F"
+    Const PR_TRANSPORT_MESSAGE_HEADERS_ANSI As String = "http://schemas.microsoft.com/mapi/proptag/0x007D001E"
+
+    On Error Resume Next
+
+    GetTransportHeaders = mailItem.PropertyAccessor.GetProperty(PR_TRANSPORT_MESSAGE_HEADERS_UNICODE)
+    If Err.Number <> 0 Then
+        Err.Clear
+        GetTransportHeaders = mailItem.PropertyAccessor.GetProperty(PR_TRANSPORT_MESSAGE_HEADERS_ANSI)
+    End If
+    If Err.Number <> 0 Then
+        Err.Clear
+        GetTransportHeaders = ""
+    End If
+
+    On Error GoTo 0
 End Function
 
 Private Function BuildAttachmentsJson(ByVal mailItem As Outlook.MailItem) As String
@@ -518,7 +541,7 @@ Private Function RemovePhishGuardCategories(ByVal categoriesText As String) As S
             GoTo ContinueLoop
         End If
 
-        If InStr(1, currentCategory, "PhishGuard - ", vbTextCompare) = 1 Then
+        If InStr(1, currentCategory, "PhishGuard", vbTextCompare) > 0 Then
             GoTo ContinueLoop
         End If
 

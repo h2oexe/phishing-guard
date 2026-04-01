@@ -1,8 +1,125 @@
 {
   "app_version": "1.0.0",
   "version_note": "Ana Sürüm",
-  "updated_at": "2026-03-30T07:04:23.282179+00:00",
+  "updated_at": "2026-04-01T13:00:31.200268+00:00",
   "change_history": [
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "19 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-01T13:00:31.200268+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Kural motoru",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "20 kural ağırlığı kaydedildi.",
+        "0 kural devre dışı bırakıldı."
+      ],
+      "timestamp": "2026-04-01T12:42:36.848162+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-01T12:25:07.669758+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-01T12:23:55.650467+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-01T12:23:17.914328+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 kural ağırlığı kaydedildi.",
+        "0 kural devre dışı bırakıldı."
+      ],
+      "timestamp": "2026-04-01T07:28:06.219846+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 kural ağırlığı kaydedildi.",
+        "0 kural devre dışı bırakıldı."
+      ],
+      "timestamp": "2026-04-01T07:11:25.305324+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-31T12:15:09.583191+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-31T12:12:28.594668+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "Alan adı ve anahtar kelime listeleri güncellendi.",
+        "2 şirket alan adı kaydedildi.",
+        "23 phishing anahtar kelimesi kaydedildi.",
+        "20 kural ağırlığı kaydedildi.",
+        "0 kural devre dışı bırakıldı."
+      ],
+      "timestamp": "2026-03-31T12:11:47.996624+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Etiket adları",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-03-31T12:11:07.147100+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "Alan adı ve anahtar kelime listeleri güncellendi.",
+        "2 şirket alan adı kaydedildi.",
+        "23 phishing anahtar kelimesi kaydedildi."
+      ],
+      "timestamp": "2026-03-31T09:03:27.624135+00:00"
+    },
     {
       "actor": "Yönetici",
       "section": "Etiket adları",
@@ -136,7 +253,11 @@
     "UNEXPECTED_ATTACHMENT_REQUEST": 20,
     "PAYMENT_REQUEST_LANGUAGE": 18,
     "BANK_CHANGE_LANGUAGE": 22,
-    "INVOICE_PRESSURE_LANGUAGE": 16
+    "INVOICE_PRESSURE_LANGUAGE": 16,
+    "SPF_FAIL": 20,
+    "SPF_SOFTFAIL": 10,
+    "DKIM_FAIL": 25,
+    "DMARC_FAIL": 35
   },
   "thresholds": {
     "low_risk_max": 24,
@@ -169,6 +290,7 @@
       "sasa.com.tr",
       "www.sasa.com.tr"
     ],
+    "trusted_ibans": [],
     "shortener_domains": [
       "bit.ly",
       "goo.gl",
@@ -330,22 +452,20 @@
       "ödenmemiş"
     ],
     "bank_change_phrases": [
-      "account details",
-      "bank account update",
       "bank details have been updated",
-      "banka hesap bilgilerimiz degisti",
-      "banka hesap bilgilerimiz değişti",
-      "hesap bilgilerimizde guncelleme",
-      "hesap bilgilerimizde güncelleme",
-      "hesap detaylari",
-      "hesap detayları",
-      "iban",
+      "updated bank details",
       "new iban",
       "new swift",
-      "swift",
-      "updated bank details",
+      "bank account update",
+      "account details",
+      "hesap bilgilerimizde guncelleme",
+      "hesap bilgilerimizde güncelleme",
       "yeni iban",
-      "yeni swift"
+      "yeni swift",
+      "banka hesap bilgilerimiz degisti",
+      "banka hesap bilgilerimiz değişti",
+      "hesap detaylari",
+      "hesap detayları"
     ],
     "invoice_pressure_phrases": [
       "24 saat icinde",
@@ -380,70 +500,111 @@
     "UNEXPECTED_ATTACHMENT_REQUEST": "Ek Açma Talebi",
     "PAYMENT_REQUEST_LANGUAGE": "Ödeme Talebi",
     "BANK_CHANGE_LANGUAGE": "IBAN Değişikliği",
-    "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı"
+    "INVOICE_PRESSURE_LANGUAGE": "Fatura Baskısı",
+    "SPF_FAIL": "SPF Hatası",
+    "SPF_SOFTFAIL": "SPF Softfail",
+    "DKIM_FAIL": "DKIM Hatası",
+    "DMARC_FAIL": "DMARC Hatası"
   },
   "rule_display_meta": {
+    "DOMAIN_LINK_MISMATCH": {
+      "title": "Alan Adı Uyuşmazlığı",
+      "description": "Bağlantı adresi ile mailin geldiği alan adı arasındaki farkı açıklar.",
+      "panel_description": "Bağlantı adresi, mailin geldiği alan adıyla uyuşmuyor."
+    },
+    "DISPLAY_TARGET_MISMATCH": {
+      "title": "Sahte Hedef Uyarısı",
+      "description": "Görünen bağlantı ile açılan gerçek adres arasındaki farkı açıklar.",
+      "panel_description": "Görünen bağlantı ile açılan gerçek adres aynı görünmüyor."
+    },
+    "SUSPICIOUS_TLD": {
+      "title": "Şüpheli Uzantı Uyarısı",
+      "description": "Riskli alan uzantıları içeren bağlantıları işaretler.",
+      "panel_description": "Bağlantı, riskli alan adı uzantısı kullanıyor olabilir."
+    },
+    "SHORTENER_LINK": {
+      "title": "Kısa Bağlantı Uyarısı",
+      "description": "Kısaltılmış bağlantı servislerinden gelen linkleri işaretler.",
+      "panel_description": "Bağlantı kısa link servisinden geliyor; gerçek adres gizlenmiş olabilir."
+    },
+    "SUSPICIOUS_ATTACHMENT": {
+      "title": "Şüpheli Ek Uyarısı",
+      "description": "Yüksek riskli dosya uzantılarına sahip ekleri işaretler.",
+      "panel_description": "Ek dosya beklenmedik veya riskli bir uzantı taşıyor olabilir."
+    },
+    "DOUBLE_EXTENSION": {
+      "title": "Çift Uzantı Uyarısı",
+      "description": "Dosya adında gizlenmiş uzantı kullanımı ihtimalini açıklar.",
+      "panel_description": "Ek dosya güvenli gibi görünse de gerçek uzantısı farklı olabilir."
+    },
     "PHISHING_KEYWORDS": {
       "title": "Phishing Anahtar Kelimeleri",
-      "description": "Metin tabanlı sinyalleri etkiler."
+      "description": "Metin tabanlı sinyalleri etkiler.",
+      "panel_description": "Mailde acele ettiren veya sizi işlem yapmaya zorlayan ifadeler var."
+    },
+    "IP_LINK": {
+      "title": "IP Bağlantısı Uyarısı",
+      "description": "Alan adı yerine doğrudan IP adresine giden bağlantıları işaretler.",
+      "panel_description": "Bağlantı alan adı yerine doğrudan bir IP adresine gidiyor."
     },
     "URGENCY_LANGUAGE": {
       "title": "Aciliyet İfadeleri",
-      "description": "Zaman baskısı oluşturan metinleri yönetir."
+      "description": "Zaman baskısı oluşturan metinleri yönetir.",
+      "panel_description": "Mail sizden hızlı karar vermenizi istiyor."
     },
     "ACCOUNT_THREAT_LANGUAGE": {
       "title": "Hesap Tehdidi İfadeleri",
-      "description": "Hesap kapanması veya askıya alma söylemlerini yönetir."
+      "description": "Hesap kapanması veya askıya alma söylemlerini yönetir.",
+      "panel_description": "Mail, hesap kapanması veya güvenlik tehdidi dili kullanıyor."
     },
     "EXTORTION_LANGUAGE": {
       "title": "Şantaj ve Şifreleme İfadeleri",
-      "description": "Dosya şifreleme, veri sızdırma veya erişim kaybı tehdidi içeren metinleri yönetir."
+      "description": "Dosya şifreleme, veri sızdırma veya erişim kaybı tehdidi içeren metinleri yönetir.",
+      "panel_description": "Mail, ödeme yapılmazsa dosyalarınızın şifreleneceğini veya erişiminizin kapanacağını söylüyor."
     },
     "UNEXPECTED_ATTACHMENT_REQUEST": {
       "title": "Ek Açma İfadeleri",
-      "description": "Ek dosya açmaya yönlendiren cümleleri tutar."
+      "description": "Ek dosya açmaya yönlendiren cümleleri tutar.",
+      "panel_description": "Beklenmedik bir ek dosyayı açmanız isteniyor."
     },
     "PAYMENT_REQUEST_LANGUAGE": {
       "title": "Ödeme Talebi İfadeleri",
-      "description": "Ödeme ve dekont çağrılarını yönetir."
+      "description": "Ödeme ve dekont çağrılarını yönetir.",
+      "panel_description": "Mail sizi ödeme yapmaya yönlendiriyor."
     },
     "BANK_CHANGE_LANGUAGE": {
       "title": "Banka Değişikliği İfadeleri",
-      "description": "IBAN veya banka hesabı değişikliği sinyallerini yönetir."
+      "description": "IBAN veya banka hesabı değişikliği sinyallerini yönetir.",
+      "panel_description": "Mail içinde IBAN veya banka bilgisi değişikliği var."
     },
     "INVOICE_PRESSURE_LANGUAGE": {
       "title": "Fatura Baskısı İfadeleri",
-      "description": "Süre baskısı ve fatura takibi söylemlerini yönetir."
+      "description": "Süre baskısı ve fatura takibi söylemlerini yönetir.",
+      "panel_description": "Mail, ödeme veya fatura işlemi için zaman baskısı kuruyor."
     },
-    "DISPLAY_TARGET_MISMATCH": {
-      "title": "",
-      "description": ""
+    "SPF_FAIL": {
+      "title": "SPF Doğrulama Hatası",
+      "description": "Gönderen sunucunun alan adı adına yetkili görünmediği durumları işaretler.",
+      "panel_description": "Gönderen sunucu, alan adı adına yetkili görünmüyor."
     },
-    "DOMAIN_LINK_MISMATCH": {
-      "title": "",
-      "description": ""
+    "SPF_SOFTFAIL": {
+      "title": "SPF Softfail Uyarısı",
+      "description": "Gönderen sunucu için zayıf veya kararsız SPF sonucu görüldüğünü gösterir.",
+      "panel_description": "Gönderen sunucu için zayıf bir SPF sonucu görüldü."
     },
-    "DOUBLE_EXTENSION": {
-      "title": "",
-      "description": ""
+    "DKIM_FAIL": {
+      "title": "DKIM İmza Hatası",
+      "description": "Mail imzasının doğrulanamadığı veya içerik bütünlüğünün bozulduğu durumları işaretler.",
+      "panel_description": "Mailin imza doğrulaması başarısız oldu; içerik değiştirilmiş olabilir."
     },
-    "IP_LINK": {
-      "title": "",
-      "description": ""
-    },
-    "SHORTENER_LINK": {
-      "title": "",
-      "description": ""
-    },
-    "SUSPICIOUS_ATTACHMENT": {
-      "title": "",
-      "description": ""
-    },
-    "SUSPICIOUS_TLD": {
-      "title": "",
-      "description": ""
+    "DMARC_FAIL": {
+      "title": "DMARC Doğrulama Hatası",
+      "description": "Alan adı hizalaması ve kimlik doğrulaması başarısız olduğunda uyarı verir.",
+      "panel_description": "Alan adı doğrulaması ve hizalaması başarısız görünüyor."
     }
   },
+  "custom_rule_modes": {},
+  "custom_rule_missing_policies": {},
   "admin_access": {
     "password_enabled": true,
     "password_hint": "admin",
