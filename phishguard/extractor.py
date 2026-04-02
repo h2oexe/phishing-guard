@@ -57,11 +57,13 @@ def extract_features(mail: MailInput) -> MailFeatures:
     attachment_request_hits = sorted({phrase for phrase in phrases["attachment_request_phrases"] if phrase in combined_text})
     payment_request_hits = sorted({phrase for phrase in phrases["payment_request_phrases"] if phrase in combined_text})
     bank_change_hits = _extract_bank_change_hits(combined_text, phrases["bank_change_phrases"])
+    bank_context_hits = _extract_bank_context_hits(combined_text)
     invoice_pressure_hits = sorted({phrase for phrase in phrases["invoice_pressure_phrases"] if phrase in combined_text})
     custom_phrase_hits: dict[str, list[str]] = {}
     custom_privileged_missing: dict[str, list[str]] = {}
     custom_rule_modes = runtime_config.get("custom_rule_modes", {})
     custom_rule_missing_policies = runtime_config.get("custom_rule_missing_policies", {})
+    custom_rule_missing_contexts = runtime_config.get("custom_rule_missing_contexts", {})
 
     for rule_id, rule_phrases in phrases.get("custom_rule_phrases", {}).items():
         normalized_phrases = [
@@ -72,12 +74,15 @@ def extract_features(mail: MailInput) -> MailFeatures:
         hits = sorted({phrase for phrase in normalized_phrases if phrase in combined_text})
         if hits:
             custom_phrase_hits[rule_id] = hits
-        elif (
-            custom_rule_modes.get(rule_id) == "privileged"
-            and custom_rule_missing_policies.get(rule_id)
-            and normalized_phrases
-        ):
-            custom_privileged_missing[rule_id] = normalized_phrases
+        elif custom_rule_modes.get(rule_id) == "privileged" and custom_rule_missing_policies.get(rule_id) and normalized_phrases:
+            context_phrases = [
+                phrase.strip().lower()
+                for phrase in custom_rule_missing_contexts.get(rule_id, [])
+                if isinstance(phrase, str) and phrase and phrase.strip()
+            ]
+            context_hits = sorted({phrase for phrase in context_phrases if phrase in combined_text})
+            if context_hits:
+                custom_privileged_missing[rule_id] = context_hits
 
     display_target_mismatches = []
     for link in links:
@@ -105,6 +110,7 @@ def extract_features(mail: MailInput) -> MailFeatures:
         attachment_request_hits=attachment_request_hits,
         payment_request_hits=payment_request_hits,
         bank_change_hits=bank_change_hits,
+        bank_context_hits=bank_context_hits,
         invoice_pressure_hits=invoice_pressure_hits,
         spf_result=auth_results["spf"],
         dkim_result=auth_results["dkim"],
@@ -217,6 +223,28 @@ def _extract_bank_change_hits(combined_text: str, configured_phrases: list[str])
     )
 
     return explicit_hits
+
+
+def _extract_bank_context_hits(combined_text: str) -> list[str]:
+    context_terms = {
+        "iban",
+        "swift",
+        "banka",
+        "hesap",
+        "hesap bilgisi",
+        "hesap detay",
+        "payment",
+        "ödeme",
+        "odeme",
+        "dekont",
+        "havale",
+        "eft",
+        "transfer",
+        "alıcı",
+        "alici",
+        "recipient",
+    }
+    return sorted(term for term in context_terms if term in combined_text)
 
 
 def _extract_ibans(text: str) -> list[str]:

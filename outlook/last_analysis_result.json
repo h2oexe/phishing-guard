@@ -1,29 +1,21 @@
 {
-  "score": 6,
+  "score": 0,
   "level": "Düşük Risk",
   "summary": "Şimdilik belirgin bir tehdit görünmüyor.",
-  "matched_rules": [
-    "SPF_SOFTFAIL"
-  ],
-  "reasons": [
-    "SPF doğrulaması softfail sonucu verdi"
-  ],
+  "matched_rules": [],
+  "reasons": [],
   "details": {
-    "sender_domain": "gmail.com",
+    "sender_domain": "sasa.com.tr",
     "link_domains": [],
-    "raw_score": 10,
-    "normalized_score": 6,
+    "raw_score": 0,
+    "normalized_score": 0,
     "normalization_base": 161,
     "confidence_counts": {
-      "low": 1,
+      "low": 0,
       "medium": 0,
       "high": 0
     },
     "intensity": "çok düşük",
-    "rule_details": {
-      "SPF_SOFTFAIL": {
-        "spf_result": "softfail"
-      }
-    }
+    "rule_details": {}
   }
 }

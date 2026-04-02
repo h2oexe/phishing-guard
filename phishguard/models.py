@@ -43,6 +43,7 @@ class MailFeatures:
     attachment_request_hits: list[str] = field(default_factory=list)
     payment_request_hits: list[str] = field(default_factory=list)
     bank_change_hits: list[str] = field(default_factory=list)
+    bank_context_hits: list[str] = field(default_factory=list)
     invoice_pressure_hits: list[str] = field(default_factory=list)
     spf_result: str = ""
     dkim_result: str = ""

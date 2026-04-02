@@ -581,7 +581,8 @@
       config.rule_chip_labels || {},
       config.rule_display_meta || {},
       config.custom_rule_modes || {},
-      config.custom_rule_missing_policies || {}
+      config.custom_rule_missing_policies || {},
+      config.custom_rule_missing_contexts || {}
     );
     renderCustomPhraseCards(config);
     applyBuiltInDisplayMeta(config.rule_display_meta || {});
@@ -720,7 +721,8 @@
           rule_chip_labels: collectLabelRows(),
           rule_display_meta: collectDisplayMetaRows(),
           custom_rule_modes: collectLabelModes(),
-          custom_rule_missing_policies: collectLabelMissingPolicies()
+          custom_rule_missing_policies: collectLabelMissingPolicies(),
+          custom_rule_missing_contexts: collectLabelMissingContexts()
         };
       }
 
@@ -781,8 +783,22 @@
     for (i = 0; i < rows.length; i += 1) {
       var key = rows[i].querySelector(".label-key-input").value.trim();
       var value = rows[i].querySelector(".label-value-input").value.trim();
+      var isPrivileged = rows[i].querySelector(".label-mode-input").checked;
+      var missingInput = rows[i].querySelector(".label-safe-missing-input");
+      var contextInput = rows[i].querySelector(".label-safe-context-input");
       if (!key || !value) {
         return "Etiket bilgisi girilmedi. Lütfen kontrol ediniz.";
+      }
+      if (
+        key &&
+        BUILTIN_RULE_KEYS.indexOf(key) < 0 &&
+        isPrivileged &&
+        missingInput &&
+        missingInput.checked &&
+        contextInput &&
+        !fromLines(contextInput.value).length
+      ) {
+        return "Güvenli kurallarda 'mailde geçmiyorsa riski artır' açıksa bağlam ifadeleri girilmelidir.";
       }
       var normalizedKey = key.toLowerCase();
       if (seenKeys[normalizedKey]) {
@@ -856,12 +872,13 @@
     renderKeyValueInputs("ruleWeightsGrid", entries, "weight-", "rulesSection", disabledRules || []);
   }
 
-  function renderLabelRows(entries, displayMeta, modes, missingPolicies) {
+  function renderLabelRows(entries, displayMeta, modes, missingPolicies, missingContexts) {
     var container = document.getElementById("chipLabelsGrid");
     clearChildren(container);
     displayMeta = displayMeta || {};
     modes = modes || {};
     missingPolicies = missingPolicies || {};
+    missingContexts = missingContexts || {};
 
     var keys = Object.keys(entries).sort();
     var i;
@@ -872,12 +889,13 @@
         entries[keys[i]],
         displayMeta[keys[i]] || {},
         modes[keys[i]] || "signal",
-        !!missingPolicies[keys[i]]
+        !!missingPolicies[keys[i]],
+        missingContexts[keys[i]] || []
       );
     }
 
     if (keys.length === 0) {
-      appendLabelRow(container, "", "", {}, "signal", false);
+      appendLabelRow(container, "", "", {}, "signal", false, []);
     }
   }
 
@@ -912,7 +930,7 @@
     }, 2200);
   }
 
-  function appendLabelRow(container, key, value, meta, mode, missingPolicyEnabled) {
+  function appendLabelRow(container, key, value, meta, mode, missingPolicyEnabled, missingContexts) {
     var row = document.createElement("div");
     var grid = document.createElement("div");
     var actionWrap = document.createElement("div");
@@ -928,7 +946,7 @@
     grid.appendChild(createField("Ba\u015fl\u0131k", "label-title-input", meta.title || "", "Kart Ba\u015fl\u0131\u011f\u0131", "labelsSection"));
     grid.appendChild(createField("A\u00e7\u0131klama", "label-description-input", meta.description || "", "K\u0131sa a\u00e7\u0131klama", "labelsSection"));
     grid.appendChild(createField("Panel A\u00e7\u0131klamas\u0131", "label-panel-description-input", getPanelDescriptionValue(key, meta), "Yan panelde g\u00f6r\u00fcnecek a\u00e7\u0131klama", "labelsSection", "is-wide"));
-    grid.appendChild(createModeSwitchField(mode || "signal", !!missingPolicyEnabled, "labelsSection"));
+    grid.appendChild(createModeSwitchField(mode || "signal", !!missingPolicyEnabled, missingContexts || [], "labelsSection", key || ""));
     row.appendChild(grid);
 
     actionWrap.className = "label-row-action";
@@ -981,7 +999,7 @@
     return span;
   }
 
-  function createModeSwitchField(mode, missingPolicyEnabled, sectionName) {
+  function createModeSwitchField(mode, missingPolicyEnabled, missingContexts, sectionName, ruleId) {
     var field = document.createElement("div");
     var label = document.createElement("label");
     var switchWrap = document.createElement("label");
@@ -994,6 +1012,10 @@
     var missingInput = document.createElement("input");
     var missingSlider = document.createElement("span");
     var missingCaption = document.createElement("span");
+    var contextWrap = document.createElement("div");
+    var contextLabel = document.createElement("span");
+    var contextInput = document.createElement("textarea");
+    var isBuiltInRule = BUILTIN_RULE_KEYS.indexOf(String(ruleId || "").trim()) >= 0;
 
     field.className = "field mode-switch-field is-wide";
 
@@ -1037,12 +1059,28 @@
     missingWrap.appendChild(missingSwitch);
     missingWrap.appendChild(missingCaption);
     field.appendChild(missingWrap);
+    contextWrap.className = "field mode-context-field is-wide" + (input.checked && missingInput.checked && !isBuiltInRule ? "" : " hidden");
+    contextLabel.appendChild(document.createTextNode("Bağlam İfadeleri"));
+    contextInput.className = "label-safe-context-input";
+    contextInput.placeholder = "Örnek: ödeme\niban\nbanka\nhesap bilgisi";
+    contextInput.value = toLines(missingContexts || []);
+    contextInput.oninput = createSectionDirtyHandler(sectionName);
+    contextInput.onchange = createSectionDirtyHandler(sectionName);
+    contextWrap.appendChild(contextLabel);
+    contextWrap.appendChild(contextInput);
+    field.appendChild(contextWrap);
     updateModeSwitchCaption(field, input.checked);
     updateMissingSwitchCaption(missingWrap, missingInput.checked);
     input.onchange = function () {
       createSectionDirtyHandler(sectionName)();
       updateModeSwitchCaption(field, input.checked);
       missingWrap.className = input.checked ? "field mode-subswitch" : "field mode-subswitch hidden";
+      contextWrap.className = input.checked && missingInput.checked && !isBuiltInRule ? "field mode-context-field is-wide" : "field mode-context-field is-wide hidden";
+    };
+    missingInput.onchange = function () {
+      createSectionDirtyHandler(sectionName)();
+      updateMissingSwitchCaption(missingWrap, missingInput.checked);
+      contextWrap.className = input.checked && missingInput.checked && !isBuiltInRule ? "field mode-context-field is-wide" : "field mode-context-field is-wide hidden";
     };
     return field;
   }
@@ -1105,7 +1143,7 @@
   }
 
   function addEmptyLabelRow() {
-    appendLabelRow(document.getElementById("chipLabelsGrid"), "", "", {}, "signal", false);
+    appendLabelRow(document.getElementById("chipLabelsGrid"), "", "", {}, "signal", false, []);
     markDirty("labelsSection");
   }
 
@@ -1159,7 +1197,7 @@
   function ensureAtLeastOneLabelRow() {
     var container = document.getElementById("chipLabelsGrid");
     if (!container.children.length) {
-      appendLabelRow(container, "", "", {}, "signal", false);
+      appendLabelRow(container, "", "", {}, "signal", false, []);
     }
   }
 
@@ -1227,6 +1265,32 @@
       var missingInput = rows[i].querySelector(".label-safe-missing-input");
       if (key && isPrivileged && missingInput) {
         values[key] = !!missingInput.checked;
+      }
+    }
+
+    return values;
+  }
+
+  function collectLabelMissingContexts() {
+    var rows = document.querySelectorAll("#chipLabelsGrid .label-row");
+    var values = {};
+    var i;
+
+    for (i = 0; i < rows.length; i += 1) {
+      var key = rows[i].querySelector(".label-key-input").value.trim();
+      var isPrivileged = rows[i].querySelector(".label-mode-input").checked;
+      var missingInput = rows[i].querySelector(".label-safe-missing-input");
+      var contextInput = rows[i].querySelector(".label-safe-context-input");
+
+      if (
+        key &&
+        BUILTIN_RULE_KEYS.indexOf(key) < 0 &&
+        isPrivileged &&
+        missingInput &&
+        missingInput.checked &&
+        contextInput
+      ) {
+        values[key] = fromLines(contextInput.value);
       }
     }
 

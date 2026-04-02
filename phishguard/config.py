@@ -30,9 +30,13 @@ SHORTENER_DOMAINS = {
 }
 
 SUSPICIOUS_ATTACHMENT_EXTENSIONS = {
+    ".7z",
     ".com",
+    ".bz2",
+    ".cab",
     ".cpl",
     ".exe",
+    ".gz",
     ".hta",
     ".img",
     ".iso",
@@ -42,8 +46,10 @@ SUSPICIOUS_ATTACHMENT_EXTENSIONS = {
     ".msi",
     ".pif",
     ".ps1",
+    ".rar",
     ".reg",
     ".scr",
+    ".tar",
     ".vbs",
     ".vb",
     ".wsf",
@@ -52,6 +58,7 @@ SUSPICIOUS_ATTACHMENT_EXTENSIONS = {
     ".bat",
     ".docm",
     ".xlsm",
+    ".zip",
 }
 
 DOUBLE_EXTENSION_BAIT_EXTENSIONS = {

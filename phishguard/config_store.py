@@ -191,6 +191,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "rule_display_meta": deepcopy(BUILTIN_RULE_DISPLAY_META),
     "custom_rule_modes": {},
     "custom_rule_missing_policies": {},
+    "custom_rule_missing_contexts": {},
     "admin_access": {
         "password_enabled": False,
         "password_hint": "",
@@ -343,6 +344,7 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     rule_weights = config.setdefault("rule_weights", {})
     custom_rule_modes = config.setdefault("custom_rule_modes", {})
     custom_rule_missing_policies = config.setdefault("custom_rule_missing_policies", {})
+    custom_rule_missing_contexts = config.setdefault("custom_rule_missing_contexts", {})
     disabled_rules = config.setdefault("disabled_rules", [])
     phrases = config.setdefault("phrases", {})
     custom_rule_phrases = phrases.setdefault("custom_rule_phrases", {})
@@ -362,6 +364,8 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
         rule_weights.setdefault(rule_id, 0)
         custom_rule_modes[rule_id] = "privileged" if custom_rule_modes.get(rule_id) == "privileged" else "signal"
         custom_rule_missing_policies[rule_id] = bool(custom_rule_missing_policies.get(rule_id, False))
+        context_values = custom_rule_missing_contexts.get(rule_id, [])
+        custom_rule_missing_contexts[rule_id] = context_values if isinstance(context_values, list) else []
         value = custom_rule_phrases.get(rule_id, [])
         custom_rule_phrases[rule_id] = value if isinstance(value, list) else []
         meta = rule_display_meta.setdefault(rule_id, {})
@@ -389,6 +393,10 @@ def _synchronize_custom_rules(config: dict[str, Any]) -> None:
     for rule_id in list(custom_rule_missing_policies):
         if rule_id not in custom_rule_ids:
             custom_rule_missing_policies.pop(rule_id, None)
+
+    for rule_id in list(custom_rule_missing_contexts):
+        if rule_id not in custom_rule_ids:
+            custom_rule_missing_contexts.pop(rule_id, None)
 
     config["disabled_rules"] = [
         rule_id for rule_id in disabled_rules if rule_id in BUILTIN_RULE_IDS or rule_id in custom_rule_ids

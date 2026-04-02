@@ -1,8 +1,56 @@
 {
   "app_version": "1.0.0",
   "version_note": "Ana Sürüm",
-  "updated_at": "2026-04-01T13:00:31.200268+00:00",
+  "updated_at": "2026-04-02T11:24:53.409879+00:00",
   "change_history": [
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "19 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-02T11:24:53.409879+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-02T08:13:10.252165+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "Alan adı ve anahtar kelime listeleri güncellendi.",
+        "2 şirket alan adı kaydedildi.",
+        "23 phishing anahtar kelimesi kaydedildi."
+      ],
+      "timestamp": "2026-04-02T08:12:16.349099+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Kural motoru",
+      "action": "Bölüm kaydedildi",
+      "details": [
+        "20 kural ağırlığı kaydedildi.",
+        "0 kural devre dışı bırakıldı."
+      ],
+      "timestamp": "2026-04-02T08:09:53.448564+00:00"
+    },
+    {
+      "actor": "Yönetici",
+      "section": "Tüm bölümler",
+      "action": "Tüm ayarlar kaydedildi",
+      "details": [
+        "20 etiket kaydı kaydedildi."
+      ],
+      "timestamp": "2026-04-02T08:09:36.171410+00:00"
+    },
     {
       "actor": "Yönetici",
       "section": "Tüm bölümler",
@@ -307,12 +355,16 @@
   },
   "attachments": {
     "suspicious_extensions": [
+      ".7z",
       ".bat",
+      ".bz2",
+      ".cab",
       ".cmd",
       ".com",
       ".cpl",
       ".docm",
       ".exe",
+      ".gz",
       ".hta",
       ".img",
       ".iso",
@@ -322,13 +374,16 @@
       ".msi",
       ".pif",
       ".ps1",
+      ".rar",
       ".reg",
       ".scr",
+      ".tar",
       ".vb",
       ".vbs",
       ".wsf",
       ".wsh",
-      ".xlsm"
+      ".xlsm",
+      ".zip"
     ],
     "double_extension_bait_extensions": [
       ".csv",
@@ -605,6 +660,7 @@
   },
   "custom_rule_modes": {},
   "custom_rule_missing_policies": {},
+  "custom_rule_missing_contexts": {},
   "admin_access": {
     "password_enabled": true,
     "password_hint": "admin",

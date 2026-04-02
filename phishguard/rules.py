@@ -204,14 +204,19 @@ def _payment_request_language(features: MailFeatures, runtime_config: dict) -> R
 
 def _bank_change_language(features: MailFeatures, runtime_config: dict) -> RuleMatch:
     only_trusted_ibans = bool(features.detected_ibans) and len(features.detected_ibans) == len(features.trusted_iban_hits)
+    has_untrusted_iban = bool(features.detected_ibans) and len(features.detected_ibans) > len(features.trusted_iban_hits)
+    has_bank_context = bool(features.bank_change_hits or features.bank_context_hits or features.payment_request_hits)
+    mixed_iban_suspicion = has_untrusted_iban and has_bank_context
     return RuleMatch(
         rule_id="BANK_CHANGE_LANGUAGE",
-        matched=bool(features.bank_change_hits) and not only_trusted_ibans,
+        matched=(bool(features.bank_change_hits) and not only_trusted_ibans) or mixed_iban_suspicion,
         weight=_rule_weight(runtime_config, "BANK_CHANGE_LANGUAGE"),
         confidence="medium",
         reason="IBAN veya banka bilgisi değişikliği bildirimi bulundu",
         details={
             "phrases": features.bank_change_hits,
+            "bank_context_hits": features.bank_context_hits,
+            "payment_request_hits": features.payment_request_hits,
             "detected_ibans": features.detected_ibans,
             "trusted_iban_hits": features.trusted_iban_hits,
         },
@@ -260,7 +265,7 @@ def _custom_phrase_rules(features: MailFeatures, runtime_config: dict) -> list[R
                 weight=_rule_weight(runtime_config, rule_id),
                 confidence="medium",
                 reason=f"{label} için güvenli ifade bulunamadı",
-                details={"missing_phrases": features.custom_privileged_missing[rule_id]},
+                details={"context_hits": features.custom_privileged_missing[rule_id]},
             )
         )
 
